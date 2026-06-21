@@ -12,11 +12,17 @@ Author: Shaikh Muhammad Zain
 """
 
 import random
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 
 class RuleBasedChatbot:
     """A simple rule-based chatbot using dictionary lookups (O(1) intent matching)."""
+
+    # Pakistan Standard Time is a fixed UTC+5 offset with no daylight saving,
+    # so a simple fixed-offset timezone is accurate (no external tz library needed).
+    # This matters because servers (e.g. PythonAnywhere) run in UTC by default;
+    # without this, "what time is it" would report server time, not local time.
+    PKT = timezone(timedelta(hours=5))
 
     def __init__(self, bot_name="Nova"):
         self.bot_name = bot_name
@@ -130,7 +136,8 @@ class RuleBasedChatbot:
     def _handle_dynamic_intents(self, intent: str) -> str:
         """Some intents need a computed answer rather than a static string."""
         if intent == "time":
-            return f"The current time is {datetime.now().strftime('%I:%M %p')}."
+            current_time = datetime.now(self.PKT).strftime('%I:%M %p')
+            return f"The current time is {current_time} (PKT)."
         return random.choice(self.knowledge_base[intent])
 
     def get_response(self, raw_input: str) -> str:
