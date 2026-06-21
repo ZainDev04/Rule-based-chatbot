@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova — Rule-Based AI Chatbot</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="bg-glow" aria-hidden="true"></div>
+<div class="scanline" aria-hidden="true"></div>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar-left" aria-hidden="true">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+    <div class="topbar-title">LOGIC_ENGINE // {{ bot_name|upper }}.exe</div>
+    <div class="topbar-right">STATUS: <span class="status-live">ONLINE</span></div>
+  </header>
+
+  <main class="layout">
+
+    <aside class="panel sidebar" aria-label="System information and suggestions">
+      <div class="panel-label">// SYSTEM</div>
+      <div class="sidebar-block">
+        <div class="sidebar-key">Architecture</div>
+        <div class="sidebar-val">Deterministic / Rule-Based</div>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-key">Lookup</div>
+        <div class="sidebar-val">Dictionary · O(1)</div>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-key">Hallucination Risk</div>
+        <div class="sidebar-val accent-mint">0%</div>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-key">Intents Loaded</div>
+        <div class="sidebar-val" id="intent-count">9</div>
+      </div>
+
+      <div class="panel-label panel-label-spaced">// TRY ASKING</div>
+      <div class="chip-row">
+        <button type="button" class="chip" data-msg="hello" aria-label="Send message: hello">hello</button>
+        <button type="button" class="chip" data-msg="what's your name" aria-label="Send message: what's your name">what's your name</button>
+        <button type="button" class="chip" data-msg="what time is it" aria-label="Send message: what time is it">what time is it</button>
+        <button type="button" class="chip" data-msg="who made you" aria-label="Send message: who made you">who made you</button>
+        <button type="button" class="chip" data-msg="help" aria-label="Send message: help">help</button>
+      </div>
+    </aside>
+
+    <section class="panel chat-panel" aria-label="Chat conversation">
+      <div class="chat-window" id="chat-window" role="log" aria-live="polite" aria-label="Conversation messages">
+        <div class="msg msg-bot">
+          <div class="msg-meta">
+            <span class="msg-sender">{{ bot_name|upper }}</span>
+            <span class="intent-tag intent-tag-system">[system]</span>
+          </div>
+          <div class="msg-bubble">Hello! I'm {{ bot_name }}, a rule-based chatbot. Type 'exit' anytime to end the session.</div>
+        </div>
+      </div>
+
+      <form class="input-row" id="chat-form">
+        <span class="prompt-arrow" aria-hidden="true">&gt;</span>
+        <label for="user-input" class="sr-only">Type a message to Nova</label>
+        <input
+          type="text"
+          id="user-input"
+          class="chat-input"
+          placeholder="Type a message..."
+          autocomplete="off"
+          autofocus
+          aria-label="Type a message to Nova"
+        >
+        <button type="submit" class="send-btn" aria-label="Send message">SEND</button>
+      </form>
+    </section>
+
+  </main>
+
+  <footer class="footer-bar">
+    DecodeLabs Industrial Training Kit — AI Project 1 · Built by Shaikh Muhammad Zain
+  </footer>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
