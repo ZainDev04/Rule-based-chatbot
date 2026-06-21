@@ -2,6 +2,9 @@
 
 > **DecodeLabs Industrial Training Kit — Artificial Intelligence | Project 1**
 
+🔗 **Live Demo:** [zaindev04.pythonanywhere.com](https://zaindev04.pythonanywhere.com)
+📂 **Repository:** [github.com/ZainDev04/Rule-based-chatbot](https://github.com/ZainDev04/Rule-based-chatbot)
+
 A deterministic, dictionary-driven chatbot built in Python. This project demonstrates the foundational logic that underpins every conversational AI system — control flow, input sanitization, intent matching, and graceful fallback handling — before introducing probabilistic, LLM-based approaches in later projects.
 
 ---
@@ -48,8 +51,8 @@ Before a system can *learn* to respond intelligently, it must first be taught to
 ### Run it locally
 
 ```bash
-git clone https://github.com/<your-username>/rule-based-chatbot.git
-cd rule-based-chatbot
+git clone https://github.com/ZainDev04/Rule-based-chatbot.git
+cd Rule-based-chatbot
 python chatbot.py
 ```
 
@@ -109,11 +112,11 @@ rule-based-chatbot/
 
 ## 🖥 Bonus: Web UI
 
-The core requirement for this project is the terminal chatbot in `chatbot.py`. As an extension, a browser-based interface is included in the `web/` folder. It reuses the exact same `RuleBasedChatbot` class — no logic is duplicated — and adds a small Flask layer on top so the chatbot can be used from a browser.
+The core requirement for this project is the terminal chatbot in `chatbot.py`. As an extension, a browser-based interface is included in the `web/` folder, and deployed live at **[zaindev04.pythonanywhere.com](https://zaindev04.pythonanywhere.com)**. It reuses the exact same `RuleBasedChatbot` class — no logic is duplicated — and adds a small Flask layer on top so the chatbot can be used from a browser.
 
 A nice side effect: each bot reply in the UI shows which intent was matched (e.g. `[greeting]`, `[time]`, `[fallback]`), making the dictionary-lookup logic visible and easy to explain.
 
-**To run the web version:**
+**To run the web version locally:**
 
 ```bash
 cd web
