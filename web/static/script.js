@@ -281,6 +281,7 @@
   }
 
   function updateTrace(data) {
+    els.tracePanel.classList.remove("is-idle");
     els.traceEmpty.hidden = true;
     els.traceList.hidden = false;
     els.traceRaw.textContent = data.raw_input;
@@ -583,6 +584,7 @@
     els.messages.innerHTML = "";
     els.welcome.hidden = false;
     els.messages.appendChild(els.welcome);
+    els.tracePanel.classList.add("is-idle");
     els.traceList.hidden = true;
     els.traceEmpty.hidden = false;
     updatePipeline("none", "none");

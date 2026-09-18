@@ -434,7 +434,9 @@ button, input, textarea {
   scroll-behavior: smooth;
 }
 
-.messages > :first-child { margin-top: auto; }
+/* A spacer that soaks up spare height, so the conversation sits at the
+   bottom of the log even when the welcome message is hidden. */
+.messages::before { content: ""; margin-top: auto; }
 
 .msg {
   display: flex;
@@ -528,7 +530,7 @@ button, input, textarea {
 }
 .chips {
   display: flex;
-  gap: var(--space-3) var(--space-2);
+  gap: var(--space-4) var(--space-2);
   padding: var(--space-2) var(--space-4) var(--space-3);
   overflow-x: auto;
   scroll-padding-inline: var(--space-4);
@@ -653,6 +655,10 @@ button, input, textarea {
   margin-bottom: var(--space-2);
 }
 .trace-empty { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+/* Until the first reply the pipeline and session details stay out of the way. */
+.trace.is-idle .pipeline,
+.trace.is-idle .session-list,
+.trace.is-idle .trace-subheading:not(.trace-subheading-intents) { display: none; }
 .trace-subheading { margin: var(--space-4) 0 var(--space-2); }
 
 .trace-list { margin: 0; }
@@ -843,9 +849,11 @@ button, input, textarea {
 .footer-inner {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  align-items: center;
+  text-align: center;
+  gap: var(--space-1);
 }
-.footer-nav { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
+.footer-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-4); }
 .footer-nav a {
   color: var(--color-text-inverse);
   min-height: var(--touch-target);
@@ -931,7 +939,7 @@ button, input, textarea {
   .layout.is-trace-hidden { grid-template-columns: minmax(0, 1fr); }
   .layout.is-trace-hidden .trace { display: none; }
   .scrim { display: none !important; }
-  .footer-inner { flex-direction: row; justify-content: space-between; align-items: center; }
+  .footer-inner { flex-direction: row; justify-content: center; gap: var(--space-5); }
   .footer-nav { flex: none; flex-wrap: nowrap; }
   .footer-nav a { min-height: 36px; }
 }

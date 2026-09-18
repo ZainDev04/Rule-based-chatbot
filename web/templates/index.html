@@ -114,7 +114,7 @@
     </form>
   </section>
 
-  <aside class="trace" id="trace-panel" aria-labelledby="trace-heading" tabindex="-1">
+  <aside class="trace is-idle" id="trace-panel" aria-labelledby="trace-heading" tabindex="-1">
     <div class="trace-head">
       <h2 id="trace-heading">Match trace</h2>
       <button type="button" class="btn btn-secondary btn-icon trace-close" id="trace-close" aria-label="Close trace panel">
@@ -122,7 +122,7 @@
       </button>
     </div>
 
-    <p class="trace-empty" id="trace-empty">Send a message to see how it was matched.</p>
+    <p class="trace-empty" id="trace-empty">Send a message and this panel shows which rule answered it, and how.</p>
 
     <dl class="trace-list" id="trace-list" hidden>
       <div class="trace-row"><dt>Raw input</dt><dd id="trace-raw"></dd></div>
@@ -161,7 +161,7 @@
       <div class="trace-row"><dt>Last intent</dt><dd id="session-last">none</dd></div>
     </dl>
 
-    <h3 class="trace-subheading">Intents</h3>
+    <h3 class="trace-subheading trace-subheading-intents">Intents</h3>
     <p class="trace-note">Every rule the bot knows, each with a phrase that triggers it.</p>
     <button type="button" class="btn btn-secondary" id="intents-open">Browse all <span id="intent-count-detail">{{ intent_count }}</span> intents</button>
   </aside>
