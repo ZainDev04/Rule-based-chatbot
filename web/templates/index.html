@@ -100,7 +100,7 @@
     <form class="composer" id="composer" novalidate>
       <label for="message" class="sr-only">Message</label>
       <div class="composer-field">
-        <textarea id="message" name="message" rows="1" maxlength="{{ max_length }}" placeholder="Type a message" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="composer-hint char-count" required></textarea>
+        <textarea id="message" name="message" rows="1" maxlength="{{ max_length }}" placeholder="Type a message" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="composer-hint" required></textarea>
         <button type="submit" class="btn btn-primary btn-send" id="send" aria-label="Send message">
           <span class="btn-label">Send</span>
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -108,7 +108,7 @@
       </div>
       <div class="composer-meta">
         <span class="composer-hint" id="composer-hint">Enter to send. Shift+Enter for a new line. Press / to focus.</span>
-        <span class="char-count" id="char-count"><span id="char-used">0</span>/{{ max_length }}</span>
+        <span class="char-count" id="char-count" hidden><span id="char-used">0</span>/{{ max_length }}</span>
       </div>
       <p class="field-error" id="form-error" role="alert" hidden></p>
     </form>

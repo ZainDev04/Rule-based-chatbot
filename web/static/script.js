@@ -413,8 +413,13 @@
 
   function updateCharCount() {
     var used = els.input.value.length;
+    var nearLimit = used >= CONFIG.maxLength * 0.9;
     els.charUsed.textContent = used;
-    els.charCount.classList.toggle("is-near-limit", used >= CONFIG.maxLength * 0.9);
+    // The counter only shows once there is something to count, and is only
+    // announced to screen readers when the limit is close.
+    els.charCount.hidden = used === 0;
+    els.charCount.classList.toggle("is-near-limit", nearLimit);
+    els.charCount.setAttribute("aria-live", nearLimit ? "polite" : "off");
   }
 
   function autosize() {
