@@ -8,6 +8,8 @@ Nova is a chatbot that answers with rules instead of a model. Every reply can be
 
 ![tests](https://github.com/ZainDev04/Rule-based-chatbot/actions/workflows/tests.yml/badge.svg)
 
+![Nova answering six messages while the trace panel shows the tier, intent and confidence for each one](docs/demo.gif)
+
 ## What it does
 
 - Understands 34 intents: greetings, small talk, the time and date, arithmetic, jokes, coin flips, remembering your name, and an honest fallback when nothing matches.
