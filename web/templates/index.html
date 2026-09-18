@@ -2,94 +2,204 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nova — Rule-Based AI Chatbot</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="{{ bot_name }} is a rule-based chatbot written in Python. Every reply shows which rule matched and how confident the match was.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#000000">
+<title>{{ bot_name }} | Rule-based chatbot</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%2382b440'/%3E%3Cpath d='M9 23V9h3l7 9.5V9h3v14h-3l-7-9.5V23z' fill='%23111'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script>
+  // Apply the saved theme before first paint so there is no flash.
+  (function () {
+    try {
+      var saved = localStorage.getItem("nova.theme");
+      if (saved === "dark" || saved === "light") {
+        document.documentElement.setAttribute("data-theme", saved);
+      }
+    } catch (err) { /* storage blocked: fall back to system preference */ }
+  })();
+</script>
 </head>
 <body>
 
-<div class="bg-glow" aria-hidden="true"></div>
-<div class="scanline" aria-hidden="true"></div>
+<a class="skip-link" href="#message">Skip to message box</a>
 
-<div class="app">
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="{{ bot_name }} home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="32" height="32" focusable="false"><rect width="32" height="32" rx="4" fill="#82b440"/><path d="M9 23V9h3l7 9.5V9h3v14h-3l-7-9.5V23z" fill="#111"/></svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">{{ bot_name }}</span>
+        <span class="brand-tagline">Rule-based chatbot</span>
+      </span>
+    </a>
 
-  <header class="topbar">
-    <div class="topbar-left" aria-hidden="true">
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
+    <div class="header-actions">
+      <span class="status" role="status" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-text" id="status-text">Online</span>
+      </span>
+
+      <button type="button" class="btn btn-header trace-toggle" id="trace-toggle" aria-expanded="false" aria-controls="trace-panel" aria-label="Match trace">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h10M4 18h13" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+        <span class="btn-label">Trace</span>
+      </button>
+
+      <button type="button" class="btn btn-header" id="theme-toggle" aria-pressed="false">
+        <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4a8.5 8.5 0 1 0 11.5 11.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        <span class="btn-label" id="theme-label">Dark theme</span>
+      </button>
+
+      <a class="btn btn-header" href="https://github.com/ZainDev04/Rule-based-chatbot" target="_blank" rel="noopener" aria-label="GitHub repository (opens in a new tab)">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>
+        <span class="btn-label">GitHub</span>
+      </a>
     </div>
-    <div class="topbar-title">LOGIC_ENGINE // {{ bot_name|upper }}.exe</div>
-    <div class="topbar-right">STATUS: <span class="status-live">ONLINE</span></div>
-  </header>
+  </div>
+</header>
 
-  <main class="layout">
+<main id="main" class="container layout">
 
-    <aside class="panel sidebar" aria-label="System information and suggestions">
-      <div class="panel-label">// SYSTEM</div>
-      <div class="sidebar-block">
-        <div class="sidebar-key">Architecture</div>
-        <div class="sidebar-val">Deterministic / Rule-Based</div>
+  <section class="chat" aria-labelledby="chat-heading">
+    <div class="chat-head">
+      <div>
+        <h1 id="chat-heading">Chat with {{ bot_name }}</h1>
+        <p class="chat-subtitle"><span id="intent-count">{{ intent_count }}</span> intents loaded. Every reply shows the rule that matched.</p>
       </div>
-      <div class="sidebar-block">
-        <div class="sidebar-key">Lookup</div>
-        <div class="sidebar-val">Dictionary · O(1)</div>
-      </div>
-      <div class="sidebar-block">
-        <div class="sidebar-key">Hallucination Risk</div>
-        <div class="sidebar-val accent-mint">0%</div>
-      </div>
-      <div class="sidebar-block">
-        <div class="sidebar-key">Intents Loaded</div>
-        <div class="sidebar-val" id="intent-count">9</div>
-      </div>
+      <button type="button" class="btn btn-secondary" id="clear-chat">Clear chat</button>
+    </div>
 
-      <div class="panel-label panel-label-spaced">// TRY ASKING</div>
-      <div class="chip-row">
-        <button type="button" class="chip" data-msg="hello" aria-label="Send message: hello">hello</button>
-        <button type="button" class="chip" data-msg="what's your name" aria-label="Send message: what's your name">what's your name</button>
-        <button type="button" class="chip" data-msg="what time is it" aria-label="Send message: what time is it">what time is it</button>
-        <button type="button" class="chip" data-msg="who made you" aria-label="Send message: who made you">who made you</button>
-        <button type="button" class="chip" data-msg="help" aria-label="Send message: help">help</button>
-      </div>
-    </aside>
-
-    <section class="panel chat-panel" aria-label="Chat conversation">
-      <div class="chat-window" id="chat-window" role="log" aria-live="polite" aria-label="Conversation messages">
-        <div class="msg msg-bot">
-          <div class="msg-meta">
-            <span class="msg-sender">{{ bot_name|upper }}</span>
-            <span class="intent-tag intent-tag-system">[system]</span>
-          </div>
-          <div class="msg-bubble">Hello! I'm {{ bot_name }}, a rule-based chatbot. Type 'exit' anytime to end the session.</div>
+    <div class="messages" id="messages" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation">
+      <article class="msg msg-bot" id="welcome-message">
+        <div class="msg-meta">
+          <span class="msg-sender">{{ bot_name }}</span>
+          <span class="intent-tag intent-tag-system">system</span>
         </div>
+        <p class="msg-bubble">Hello! I'm {{ bot_name }}, a rule-based chatbot with {{ intent_count }} intents. Ask me the time, tell me your name, give me a sum to solve, or type 'help' to see what I can do.</p>
+      </article>
+    </div>
+
+    <div class="suggestions">
+      <p class="suggestions-label" id="suggestions-label">Try one of these</p>
+      <div class="chips" id="chips" role="group" aria-labelledby="suggestions-label">
+        <button type="button" class="chip" data-message="hello">hello</button>
+        <button type="button" class="chip" data-message="what's your name">what's your name</button>
+        <button type="button" class="chip" data-message="what time is it">what time is it</button>
+        <button type="button" class="chip" data-message="my name is Zain">my name is Zain</button>
+        <button type="button" class="chip" data-message="what is 12 * 7">what is 12 * 7</button>
+        <button type="button" class="chip" data-message="tell me a joke">tell me a joke</button>
+        <button type="button" class="chip" data-message="helo there">helo there</button>
+        <button type="button" class="chip" data-message="help">help</button>
       </div>
+    </div>
 
-      <form class="input-row" id="chat-form">
-        <span class="prompt-arrow" aria-hidden="true">&gt;</span>
-        <label for="user-input" class="sr-only">Type a message to Nova</label>
-        <input
-          type="text"
-          id="user-input"
-          class="chat-input"
-          placeholder="Type a message..."
-          autocomplete="off"
-          autofocus
-          aria-label="Type a message to Nova"
-        >
-        <button type="submit" class="send-btn" aria-label="Send message">SEND</button>
-      </form>
-    </section>
+    <form class="composer" id="composer" novalidate>
+      <label for="message" class="sr-only">Message</label>
+      <div class="composer-field">
+        <textarea id="message" name="message" rows="1" maxlength="{{ max_length }}" placeholder="Type a message" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="composer-hint char-count" required></textarea>
+        <button type="submit" class="btn btn-primary btn-send" id="send" aria-label="Send message">
+          <span class="btn-label">Send</span>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        </button>
+      </div>
+      <div class="composer-meta">
+        <span class="composer-hint" id="composer-hint">Enter to send. Shift+Enter for a new line. Press / to focus.</span>
+        <span class="char-count" id="char-count"><span id="char-used">0</span>/{{ max_length }}</span>
+      </div>
+      <p class="field-error" id="form-error" role="alert" hidden></p>
+    </form>
+  </section>
 
-  </main>
+  <aside class="trace" id="trace-panel" aria-labelledby="trace-heading" tabindex="-1">
+    <div class="trace-head">
+      <h2 id="trace-heading">Match trace</h2>
+      <button type="button" class="btn btn-secondary btn-icon trace-close" id="trace-close" aria-label="Close trace panel">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
 
-  <footer class="footer-bar">
-    DecodeLabs Industrial Training Kit — AI Project 1 · Built by Shaikh Muhammad Zain
-  </footer>
+    <p class="trace-empty" id="trace-empty">Send a message to see how it was matched.</p>
 
-</div>
+    <dl class="trace-list" id="trace-list" hidden>
+      <div class="trace-row"><dt>Raw input</dt><dd id="trace-raw"></dd></div>
+      <div class="trace-row"><dt>Cleaned</dt><dd id="trace-clean"></dd></div>
+      <div class="trace-row"><dt>Tier</dt><dd id="trace-tier"></dd></div>
+      <div class="trace-row"><dt>Intent</dt><dd id="trace-intent"></dd></div>
+      <div class="trace-row"><dt>Matched phrase</dt><dd id="trace-phrase"></dd></div>
+      <div class="trace-row">
+        <dt>Confidence</dt>
+        <dd>
+          <div class="meter" id="trace-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="trace-confidence-label">
+            <span class="meter-fill" id="trace-meter-fill"></span>
+          </div>
+          <span id="trace-confidence-label" class="meter-label">0%</span>
+        </dd>
+      </div>
+      <div class="trace-row"><dt>Entities</dt><dd id="trace-entities"></dd></div>
+      <div class="trace-row"><dt>Server time</dt><dd id="trace-ms"></dd></div>
+    </dl>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+    <h3 class="trace-subheading">Pipeline</h3>
+    <ol class="pipeline" id="pipeline">
+      <li data-step="sanitize"><span class="pipeline-name">Sanitize</span><span class="pipeline-note">lowercase, strip, normalise</span></li>
+      <li data-step="exact"><span class="pipeline-name">Exact lookup</span><span class="pipeline-note">dictionary, O(1)</span></li>
+      <li data-step="pattern"><span class="pipeline-name">Pattern</span><span class="pipeline-note">regex with entities</span></li>
+      <li data-step="keyword"><span class="pipeline-name">Keyword</span><span class="pipeline-note">longest phrase inside text</span></li>
+      <li data-step="fuzzy"><span class="pipeline-name">Fuzzy</span><span class="pipeline-note">typo tolerance, ratio 0.8</span></li>
+      <li data-step="fallback"><span class="pipeline-name">Fallback</span><span class="pipeline-note">honest "I don't know"</span></li>
+    </ol>
+
+    <h3 class="trace-subheading">Session</h3>
+    <dl class="trace-list session-list">
+      <div class="trace-row"><dt>Your name</dt><dd id="session-name">unknown</dd></div>
+      <div class="trace-row"><dt>Turns</dt><dd id="session-turns">0</dd></div>
+      <div class="trace-row"><dt>Last intent</dt><dd id="session-last">none</dd></div>
+    </dl>
+
+    <h3 class="trace-subheading">Intents</h3>
+    <details class="intents">
+      <summary>Show all <span id="intent-count-detail">{{ intent_count }}</span> intents</summary>
+      <ul class="intent-list" id="intent-list" aria-label="Loaded intents"></ul>
+    </details>
+  </aside>
+
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p class="footer-text">Built by Shaikh Muhammad Zain for the DecodeLabs AI internship, Project 1. Python, Flask, and no machine learning.</p>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="https://github.com/ZainDev04/Rule-based-chatbot" target="_blank" rel="noopener">Source code</a>
+      <a href="/api/intents">Intents API</a>
+      <a href="/api/health">Health</a>
+    </nav>
+  </div>
+</footer>
+
+<template id="message-template">
+  <article class="msg">
+    <div class="msg-meta">
+      <span class="msg-sender"></span>
+      <span class="intent-tag" hidden></span>
+      <time class="msg-time"></time>
+    </div>
+    <p class="msg-bubble"></p>
+  </article>
+</template>
+
+<script>
+  window.NOVA_CONFIG = {
+    botName: {{ bot_name|tojson }},
+    maxLength: {{ max_length|tojson }},
+    intentCount: {{ intent_count|tojson }}
+  };
+</script>
+<script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </body>
 </html>

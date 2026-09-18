@@ -340,7 +340,7 @@ class RuleBasedChatbot:
             validator = self.validators.get(self.intents[intent_name].get("handler", ""))
             if validator and not validator(entities):
                 continue
-            return MatchResult(intent_name, "pattern", 0.95, regex.pattern, entities)
+            return MatchResult(intent_name, "pattern", 0.95, found.group(0), entities)
 
         # 3. keyword: longest known phrase contained in the message wins,
         #    so "what time is it" beats "hi" in "hi what time is it".
