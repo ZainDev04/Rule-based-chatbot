@@ -113,7 +113,9 @@
   els.themeToggle.addEventListener("click", function () {
     var next = currentTheme() === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
-    writeStorage(STORAGE.theme, next);
+    // Stored as a plain word (not JSON) because the inline script in the
+    // page head reads it before this file loads.
+    try { localStorage.setItem(STORAGE.theme, next); } catch (err) { /* private mode */ }
     applyThemeButton();
   });
 

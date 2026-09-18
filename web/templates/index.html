@@ -13,7 +13,7 @@
   // Apply the saved theme before first paint so there is no flash.
   (function () {
     try {
-      var saved = localStorage.getItem("nova.theme");
+      var saved = (localStorage.getItem("nova.theme") || "").replace(/"/g, "");
       if (saved === "dark" || saved === "light") {
         document.documentElement.setAttribute("data-theme", saved);
       }
