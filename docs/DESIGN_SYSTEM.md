@@ -180,7 +180,7 @@ Behaviour: `title` names the tier. The tag is not focusable.
 
 ### 3.6 Trace panel
 
-Anatomy: heading, close button (phones only), empty state, definition list of the last match, pipeline list, session list, collapsible intent list.
+Anatomy: heading, close button (phones only), empty state, definition list of the last match, pipeline list, session list, a short note and a button that opens the intent dialog.
 
 Placement: below 768px it is a bottom sheet (`position: fixed`, 85dvh max, scrim behind). From 768px it is a sticky column of 300px, 340px from 1024px, scrolling internally.
 
@@ -188,7 +188,9 @@ States:
 - closed (phones): translated off screen and `visibility: hidden` so nothing inside is focusable.
 - open: `is-open` class, the toggle has `aria-expanded="true"`, focus moves to the panel, Escape or the scrim closes it and focus returns to the toggle.
 
-Pipeline list: seven steps (sanitize, exact, pattern, keyword, fuzzy, vector, fallback). Step 1 is always marked tried. Steps before the hit are marked tried, the hit is marked with the accent, later steps stay neutral. A fallback marks step 7.
+Pipeline list: seven steps (sanitize, exact, pattern, keyword, fuzzy, vector, fallback) joined by a 2px thread so they read as one flow. Step 1 is always marked tried. Steps before the hit are marked tried, the hit is marked with the accent, later steps stay neutral. A fallback marks step 7.
+
+Intent dialog: a native `<dialog>` opened by "Browse all 34 intents". One row per intent (name, description, one phrase to send), a filter field that matches names, descriptions and every example phrase, and an empty state when nothing matches. The list renders when the dialog opens, so the column itself stays short. Escape, the close button or the backdrop closes it and focus returns to the button.
 
 Empty state: "Send a message to see how it was matched." Long values (a 500-character input) wrap inside the definition cell.
 
@@ -221,7 +223,7 @@ Each criterion is a pass or fail check a reviewer can run.
 Voice: short, plain, confident. The bot says what it can and cannot do without apologising more than once.
 
 Rules with examples:
-- Buttons are verbs: "Send", "Clear chat", "Show all 34 intents". Not "OK", "Go", "Submit".
+- Buttons are verbs: "Send", "Clear chat", "Browse all 34 intents". Not "OK", "Go", "Submit".
 - Errors say what happened and what to do: "Messages are limited to 500 characters." Not "Invalid input."
 - Limitations are stated as facts: "I don't have access to live weather data." Not "Unfortunately I am unable to help with that request at this time."
 - Hints describe the shortcut, nothing else: "Enter to send. Shift+Enter for a new line. Press / to focus."

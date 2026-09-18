@@ -100,7 +100,7 @@
     <form class="composer" id="composer" novalidate>
       <label for="message" class="sr-only">Message</label>
       <div class="composer-field">
-        <textarea id="message" name="message" rows="1" maxlength="{{ max_length }}" placeholder="Type a message" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="composer-hint" required></textarea>
+        <textarea id="message" name="message" rows="1" maxlength="{{ max_length }}" placeholder="Type a message" autocomplete="off" autocapitalize="off" spellcheck="false" required></textarea>
         <button type="submit" class="btn btn-primary btn-send" id="send" aria-label="Send message">
           <span class="btn-label">Send</span>
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -162,13 +162,27 @@
     </dl>
 
     <h3 class="trace-subheading">Intents</h3>
-    <details class="intents">
-      <summary>Show all <span id="intent-count-detail">{{ intent_count }}</span> intents</summary>
-      <ul class="intent-list" id="intent-list" aria-label="Loaded intents"></ul>
-    </details>
+    <p class="trace-note">Every rule the bot knows, each with a phrase that triggers it.</p>
+    <button type="button" class="btn btn-secondary" id="intents-open">Browse all <span id="intent-count-detail">{{ intent_count }}</span> intents</button>
   </aside>
 
 </main>
+
+<dialog class="intents-dialog" id="intents-dialog" aria-labelledby="intents-heading">
+  <div class="intents-head">
+    <h2 id="intents-heading">All <span id="intent-count-dialog">{{ intent_count }}</span> intents</h2>
+    <button type="button" class="btn btn-secondary btn-icon" id="intents-close" aria-label="Close intent list">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="intents-tools">
+    <label for="intent-filter" class="sr-only">Filter intents</label>
+    <input type="search" id="intent-filter" class="intent-filter" placeholder="Filter by name or phrase" autocomplete="off" spellcheck="false">
+    <p class="intents-hint">Pick a phrase to send it.</p>
+  </div>
+  <ul class="intent-list" id="intent-list" aria-label="Loaded intents"></ul>
+  <p class="intents-empty" id="intents-empty" hidden>No intent matches that.</p>
+</dialog>
 
 <div class="scrim" id="scrim" hidden></div>
 

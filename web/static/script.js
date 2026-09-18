@@ -53,6 +53,11 @@
     sessionTurns: $("session-turns"),
     sessionLast: $("session-last"),
     intentList: $("intent-list"),
+    intentsOpen: $("intents-open"),
+    intentsDialog: $("intents-dialog"),
+    intentsClose: $("intents-close"),
+    intentFilter: $("intent-filter"),
+    intentsEmpty: $("intents-empty"),
     template: $("message-template")
   };
 
@@ -278,36 +283,73 @@
 
   // ------------------------------------------------------------- intents
 
+  var intents = [];
+
   function loadIntents() {
     fetch("/api/intents").then(function (res) { return res.json(); }).then(function (body) {
-      els.intentList.innerHTML = "";
-      body.intents.forEach(function (item) {
-        var li = document.createElement("li");
-        var name = document.createElement("span");
-        name.className = "intent-name";
-        name.textContent = item.name + (item.dynamic ? " (dynamic)" : "");
-        var desc = document.createElement("span");
-        desc.className = "intent-desc";
-        desc.textContent = item.description;
-        li.appendChild(name);
-        li.appendChild(desc);
-        item.examples.forEach(function (example) {
-          var btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "intent-example";
-          btn.textContent = example;
-          btn.setAttribute("aria-label", "Send: " + example);
-          btn.addEventListener("click", function () { closeTrace(); sendMessage(example); });
-          li.appendChild(btn);
-        });
-        els.intentList.appendChild(li);
-      });
+      intents = body.intents;
       $("intent-count").textContent = body.count;
       $("intent-count-detail").textContent = body.count;
+      $("intent-count-dialog").textContent = body.count;
     }).catch(function () {
       els.intentList.innerHTML = "<li>Could not load the intent list.</li>";
     });
   }
+
+  // One row per intent with a single phrase to try. The full example list
+  // lives in /api/intents; showing all of them here was too much to scan.
+  function renderIntents(query) {
+    var shown = 0;
+    els.intentList.innerHTML = "";
+    intents.forEach(function (item) {
+      var haystack = [item.name, item.description].concat(item.examples).join(" ").toLowerCase();
+      if (query && haystack.indexOf(query) === -1) return;
+      shown += 1;
+      var li = document.createElement("li");
+      li.className = "intent-row";
+      var info = document.createElement("span");
+      info.className = "intent-info";
+      var name = document.createElement("span");
+      name.className = "intent-name";
+      name.textContent = item.name + (item.dynamic ? " (dynamic)" : "");
+      var desc = document.createElement("span");
+      desc.className = "intent-desc";
+      desc.textContent = item.description;
+      info.appendChild(name);
+      info.appendChild(desc);
+      li.appendChild(info);
+      var example = item.examples[0];
+      if (example) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "intent-example";
+        btn.textContent = example;
+        btn.setAttribute("aria-label", "Send: " + example);
+        btn.addEventListener("click", function () {
+          els.intentsDialog.close();
+          closeTrace();
+          sendMessage(example);
+        });
+        li.appendChild(btn);
+      }
+      els.intentList.appendChild(li);
+    });
+    els.intentsEmpty.hidden = shown > 0;
+  }
+
+  els.intentsOpen.addEventListener("click", function () {
+    renderIntents(els.intentFilter.value.trim().toLowerCase());
+    els.intentsDialog.showModal();
+    els.intentFilter.focus();
+  });
+  els.intentsClose.addEventListener("click", function () { els.intentsDialog.close(); });
+  els.intentFilter.addEventListener("input", function () {
+    renderIntents(els.intentFilter.value.trim().toLowerCase());
+  });
+  // A click on the backdrop lands on the dialog element itself, not its children.
+  els.intentsDialog.addEventListener("click", function (event) {
+    if (event.target === els.intentsDialog) els.intentsDialog.close();
+  });
 
   // -------------------------------------------------------------- status
 
