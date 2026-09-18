@@ -156,7 +156,7 @@ States:
 
 Placement: pinned at every width. The body is `100dvh` and only the message log scrolls, so the composer and the footer stay in view on phones as well as on desktop. Below 620px of height the suggestion chips and the chat subtitle are dropped to leave room for the log.
 
-Behaviour: Enter sends, Shift+Enter inserts a newline, Escape clears. The textarea grows with content up to 144px (six lines) and then scrolls. `maxlength` is 500; the counter is hidden while the box is empty and turns red at 450. Empty submissions show "Type a message first." instead of sending.
+Behaviour: Enter sends, Shift+Enter inserts a newline, Escape clears. The textarea grows with content up to 144px (six lines) and then scrolls. `maxlength` is 500; the counter is hidden while the box is empty and turns red at 450. The Send button is disabled while the box is empty or a reply is pending; Enter on an empty box still shows "Type a message first." so keyboard users get feedback rather than silence.
 
 Edge cases: a 500-character message wraps inside the box; pasted newlines are kept; whitespace-only input counts as empty.
 
@@ -194,7 +194,7 @@ Pipeline list: seven steps (sanitize, exact, pattern, keyword, fuzzy, vector, fa
 
 Intent dialog: a native `<dialog>` opened by "Browse all 34 intents". One row per intent (name, description, one phrase to send), a filter field that matches names, descriptions and every example phrase, and an empty state when nothing matches. The list renders when the dialog opens, so the column itself stays short. Escape, the close button or the backdrop closes it and focus returns to the button.
 
-Empty state: "Send a message to see which rule answered it." While idle (`is-idle` on the panel) only that line and the Intents section show; the pipeline and session lists appear with the first reply and hide again on Clear chat. Long values (a 500-character input) wrap inside the definition cell.
+Empty state: "Send a message to see which rule answered it." While idle (`is-idle` on the panel) only that line and the Intents section show and, on wide screens, the card wraps its content instead of stretching to the column; the pipeline and session lists appear with the first reply and hide again on Clear chat. Long values (a 500-character input) wrap inside the definition cell.
 
 ### 3.7 Header and footer bands
 

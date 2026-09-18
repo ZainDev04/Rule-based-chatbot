@@ -393,9 +393,16 @@
 
   // ---------------------------------------------------------------- send
 
+  // The Send button is greyed out while there is nothing to send. Enter on an
+  // empty box still reaches the submit handler (requestSubmit ignores the
+  // button state), so keyboard users get "Type a message first." as before.
+  function updateSendState() {
+    els.send.disabled = state.busy || !els.input.value.trim();
+  }
+
   function setBusy(busy) {
     state.busy = busy;
-    els.send.disabled = busy;
+    updateSendState();
     els.send.classList.toggle("is-loading", busy);
     els.send.setAttribute("aria-busy", String(busy));
     els.chips.querySelectorAll(".chip").forEach(function (chip) { chip.disabled = busy; });
@@ -495,6 +502,7 @@
     els.charCount.hidden = used === 0;
     els.charCount.classList.toggle("is-near-limit", nearLimit);
     els.charCount.setAttribute("aria-live", nearLimit ? "polite" : "off");
+    updateSendState();
   }
 
   function autosize() {

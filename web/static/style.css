@@ -930,6 +930,8 @@ button, input, textarea {
     box-shadow: none;
   }
   .trace-close { display: none; }
+  /* While idle the card wraps its two lines instead of stretching to the column. */
+  .trace.is-idle { height: auto; align-self: start; }
   .layout.is-trace-hidden { grid-template-columns: minmax(0, 1fr); }
   .layout.is-trace-hidden .trace { display: none; }
   .scrim { display: none !important; }
