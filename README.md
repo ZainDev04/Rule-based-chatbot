@@ -98,9 +98,9 @@ cd web
 python app.py
 ```
 
-Open `http://127.0.0.1:5000`. The page shows the chat on the left and a match trace on the right (a bottom sheet on phones): raw and cleaned input, the tier that matched, the intent, the matched phrase, a confidence meter, extracted entities and server processing time. The pipeline diagram lights up the step that produced the answer.
+Open `http://127.0.0.1:5000`. The page shows the chat on the left and a match trace on the right (a bottom sheet on phones). The trace stays quiet until the first reply; after that it shows raw and cleaned input, the tier that matched, the intent, the matched phrase, a confidence meter, extracted entities and server processing time, and the pipeline diagram lights up the step that produced the answer. The Trace button in the header hides the column on wide screens and the choice is remembered. "Browse all 34 intents" opens a dialog with one phrase per intent and a filter box.
 
-The interface follows the Renovast design tokens (Helvetica Neue, 16px base, 4px radius, green accent, black header and footer) and is documented in [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md). It works from 320px wide upwards, supports light and dark themes, and every control is reachable with the keyboard.
+The interface follows the Renovast design tokens (Helvetica Neue, 16px base, 4px radius, green accent, black header and footer) and is documented in [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md). It works from 320px wide upwards, keeps the message box on screen at every size (only the conversation scrolls), supports light and dark themes, and every control is reachable with the keyboard.
 
 ### API
 
@@ -211,6 +211,21 @@ Why sessions travel with the browser: the demo runs on Vercel, where two request
 Why the trace panel: in an interview, the interesting part of a rule-based bot is the matching, not the replies. Showing the tier and confidence on every message turns the demo into an explanation.
 
 Why TF-IDF for the vector tier and not a sentence embedding model: a small model such as `all-MiniLM-L6-v2` needs PyTorch, which puts the deployment at roughly 900 MB against Vercel's 500 MB function limit, adds seconds of cold start, and makes the reply depend on weights nobody can read. TF-IDF with a synonym table is 60 lines of standard-library Python, builds in a few milliseconds, gives a score that can be explained word by word, and lives in the same JSON file as everything else. It is a weaker matcher, and the limitations below say so.
+
+## Usability review
+
+After the first deployment the live page went through five rounds of an automated heuristics audit (Nielsen-style, scored out of 100). Each round produced a short list of findings; the ones that pointed at something real were fixed and the rest were noted. What changed as a result:
+
+- Labels are sentence case instead of small caps, and the "system" tag on the welcome message got readable contrast.
+- The conversation is anchored to the bottom of the log, so the greeting sits next to the suggestion chips and the message box instead of leaving a gap.
+- The character counter only appears once there is something to count, and the keyboard hint has room under the box.
+- The intent list used to be 99 example buttons inside the trace column. It is now a dialog with one row per intent, a filter, and lazy rendering, so the column stays short and the count matches the "34 intents" label.
+- The pipeline steps are joined by a thread, the markers are outlined instead of boxed, and the notes are written in plain words ("close enough despite typos") rather than algorithm names.
+- The trace column can be hidden, shows only one line until the first reply, and its heading sits level with the chat heading.
+- The header brand, page heading and footer share one left edge on wide screens; the footer is a single centred stack.
+- The message box is pinned on phones as well as on desktop.
+
+Two lessons from the process. Automated auditors read the accessibility tree and measure boxes inside scroll containers, so an `aria-describedby` on the textarea was reported as duplicated text and the collapsed intent list was reported as 5000px of page. And some findings are artefacts of the auditor's own capture: the tool reported a "ghost" copy of the message box in every round, while full-page screenshots from headless Chrome at three viewport sizes show exactly one. Those were left alone.
 
 ## Deployment
 
