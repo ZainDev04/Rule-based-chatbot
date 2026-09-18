@@ -12,7 +12,7 @@
   "use strict";
 
   var CONFIG = window.NOVA_CONFIG || { botName: "Nova", maxLength: 500 };
-  var STORAGE = { session: "nova.session", state: "nova.state", history: "nova.history", theme: "nova.theme" };
+  var STORAGE = { session: "nova.session", state: "nova.state", trace: "nova.trace", history: "nova.history", theme: "nova.theme" };
   var HISTORY_LIMIT = 60;
   var THINK_DELAY_MS = 350; // small pause so the typing indicator is visible
 
@@ -381,6 +381,7 @@
         kind: data.intent === "exit" ? "system" : undefined
       });
       updateTrace(data);
+      writeStorage(STORAGE.trace, data);
       // Keep a copy of the memory so it survives a server restart or a new instance.
       state.sessionState = data.session || null;
       writeStorage(STORAGE.state, state.sessionState);
@@ -494,6 +495,7 @@
     state.sessionState = null;
     removeStorage(STORAGE.history);
     removeStorage(STORAGE.state);
+    removeStorage(STORAGE.trace);
     state.sessionId = newSessionId();
     writeStorage(STORAGE.session, state.sessionId);
 
@@ -516,19 +518,11 @@
     if (!state.history.length) return;
     els.welcome.hidden = true;
     state.history.forEach(renderMessage);
-    var lastBot = null;
-    for (var i = state.history.length - 1; i >= 0; i--) {
-      if (state.history[i].role === "bot" && state.history[i].tier) { lastBot = state.history[i]; break; }
-    }
-    if (lastBot) updatePipeline(lastBot.tier, lastBot.intent);
+    var lastTrace = readStorage(STORAGE.trace, null);
+    if (lastTrace && typeof lastTrace.intent === "string") updateTrace(lastTrace);
   }
 
   restoreHistory();
-  if (state.sessionState) {
-    els.sessionName.textContent = state.sessionState.user_name || "unknown";
-    els.sessionTurns.textContent = state.sessionState.turn_count || 0;
-    els.sessionLast.textContent = state.sessionState.last_intent || "none";
-  }
   loadIntents();
   updateCharCount();
   fetch("/api/health").then(function (r) { setOnline(r.ok); }).catch(function () { setOnline(false); });
