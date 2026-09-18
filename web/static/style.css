@@ -597,7 +597,7 @@ button, input, textarea {
   display: flex;
   justify-content: space-between;
   gap: var(--space-2);
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
@@ -754,12 +754,6 @@ button, input, textarea {
 .pipeline li.is-hit::before { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-contrast); font-weight: var(--font-weight-bold); }
 .pipeline li.is-hit .pipeline-name { color: var(--color-accent-text); font-weight: var(--font-weight-medium); }
 .pipeline li.is-hit .pipeline-name::after { content: " matched"; font-weight: var(--font-weight-regular); }
-
-.trace-note {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-2);
-}
 
 .intents-dialog {
   width: min(100% - 2 * var(--gutter), 520px);
@@ -939,7 +933,6 @@ button, input, textarea {
   .layout.is-trace-hidden { grid-template-columns: minmax(0, 1fr); }
   .layout.is-trace-hidden .trace { display: none; }
   .scrim { display: none !important; }
-  .footer-inner { flex-direction: row; justify-content: center; gap: var(--space-5); }
   .footer-nav { flex: none; flex-wrap: nowrap; }
   .footer-nav a { min-height: 36px; }
 }
@@ -949,7 +942,7 @@ button, input, textarea {
   :root { --gutter: 32px; }
   .layout { grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-5); }
   .msg { max-width: 70%; }
-  .trace { padding: var(--space-5) var(--space-4) var(--space-4); }
+  .trace { padding: var(--space-4); }
 }
 
 /* Very short viewports (landscape phones): keep the composer reachable. */

@@ -182,7 +182,7 @@ Behaviour: `title` names the tier. The tag is not focusable.
 
 ### 3.6 Trace panel
 
-Anatomy: heading, close button (phones only), empty state, definition list of the last match, pipeline list, session list, a short note and a button that opens the intent dialog.
+Anatomy: heading, close button (phones only), empty state, definition list of the last match, pipeline list, session list, a button that opens the intent dialog.
 
 Placement: below 768px it is a bottom sheet (`position: fixed`, 85dvh max, scrim behind). From 768px it is a column of 300px, 340px from 1024px, scrolling internally. The header's Trace button hides or shows the column on wide screens (`is-trace-hidden` on the layout, remembered in `nova.trace-column`) and opens the sheet on phones. Step notes are written in plain words ("close enough despite typos"), not algorithm names.
 
@@ -194,7 +194,7 @@ Pipeline list: seven steps (sanitize, exact, pattern, keyword, fuzzy, vector, fa
 
 Intent dialog: a native `<dialog>` opened by "Browse all 34 intents". One row per intent (name, description, one phrase to send), a filter field that matches names, descriptions and every example phrase, and an empty state when nothing matches. The list renders when the dialog opens, so the column itself stays short. Escape, the close button or the backdrop closes it and focus returns to the button.
 
-Empty state: "Send a message and this panel shows which rule answered it, and how." While idle (`is-idle` on the panel) only that line and the Intents section show; the pipeline and session lists appear with the first reply and hide again on Clear chat. Long values (a 500-character input) wrap inside the definition cell.
+Empty state: "Send a message to see which rule answered it." While idle (`is-idle` on the panel) only that line and the Intents section show; the pipeline and session lists appear with the first reply and hide again on Clear chat. Long values (a 500-character input) wrap inside the definition cell.
 
 ### 3.7 Header and footer bands
 
