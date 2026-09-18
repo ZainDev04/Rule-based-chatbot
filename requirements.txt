@@ -1,0 +1,5 @@
+# Runtime (web interface only; chatbot.py itself needs nothing outside the standard library)
+Flask>=3.0
+
+# Development and testing
+pytest>=8.0
