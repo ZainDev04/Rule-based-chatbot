@@ -182,7 +182,7 @@ Behaviour: `title` names the tier. The tag is not focusable.
 
 Anatomy: heading, close button (phones only), empty state, definition list of the last match, pipeline list, session list, a short note and a button that opens the intent dialog.
 
-Placement: below 768px it is a bottom sheet (`position: fixed`, 85dvh max, scrim behind). From 768px it is a sticky column of 300px, 340px from 1024px, scrolling internally.
+Placement: below 768px it is a bottom sheet (`position: fixed`, 85dvh max, scrim behind). From 768px it is a column of 300px, 340px from 1024px, scrolling internally. The header's Trace button hides or shows the column on wide screens (`is-trace-hidden` on the layout, remembered in `nova.trace-column`) and opens the sheet on phones. Step notes are written in plain words ("close enough despite typos"), not algorithm names.
 
 States:
 - closed (phones): translated off screen and `visibility: hidden` so nothing inside is focusable.

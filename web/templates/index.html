@@ -145,13 +145,13 @@
 
     <h3 class="trace-subheading">Pipeline</h3>
     <ol class="pipeline" id="pipeline">
-      <li data-step="sanitize"><span class="pipeline-name">Sanitize</span><span class="pipeline-note">lowercase, strip, normalise</span></li>
-      <li data-step="exact"><span class="pipeline-name">Exact lookup</span><span class="pipeline-note">dictionary, O(1)</span></li>
-      <li data-step="pattern"><span class="pipeline-name">Pattern</span><span class="pipeline-note">regex with entities</span></li>
-      <li data-step="keyword"><span class="pipeline-name">Keyword</span><span class="pipeline-note">longest phrase inside text</span></li>
-      <li data-step="fuzzy"><span class="pipeline-name">Fuzzy</span><span class="pipeline-note">typo tolerance, ratio 0.8</span></li>
-      <li data-step="vector"><span class="pipeline-name">Vector</span><span class="pipeline-note">TF-IDF cosine, paraphrases</span></li>
-      <li data-step="fallback"><span class="pipeline-name">Fallback</span><span class="pipeline-note">honest "I don't know"</span></li>
+      <li data-step="sanitize"><span class="pipeline-name">Sanitize</span><span class="pipeline-note">lowercase, trim, expand shorthand</span></li>
+      <li data-step="exact"><span class="pipeline-name">Exact lookup</span><span class="pipeline-note">the phrase is known word for word</span></li>
+      <li data-step="pattern"><span class="pipeline-name">Pattern</span><span class="pipeline-note">a pattern with slots for names and numbers</span></li>
+      <li data-step="keyword"><span class="pipeline-name">Keyword</span><span class="pipeline-note">a known phrase inside the message</span></li>
+      <li data-step="fuzzy"><span class="pipeline-name">Fuzzy</span><span class="pipeline-note">close enough despite typos</span></li>
+      <li data-step="vector"><span class="pipeline-name">Vector</span><span class="pipeline-note">similar wording, different order</span></li>
+      <li data-step="fallback"><span class="pipeline-name">Fallback</span><span class="pipeline-note">nothing fits, so the bot says so</span></li>
     </ol>
 
     <h3 class="trace-subheading">Session</h3>

@@ -894,12 +894,13 @@ button, input, textarea {
   .btn-header { padding-inline: var(--space-3); }
 }
 
-/* Tablets and up: two columns. The page fills the viewport exactly and never
-   scrolls; the chat log and the trace column scroll inside their panels.
-   This keeps the footer in view and stops panels sliding under the header. */
+/* Tablets and up: two columns. The page fills the viewport exactly; the
+   chat log and the trace column scroll inside their panels, so the document
+   itself has nothing to scroll and the footer stays in view. */
 @media (min-width: 768px) {
   :root { --gutter: 24px; }
-  body { height: 100dvh; overflow: hidden; }
+  body { height: 100dvh; }
+  .header-inner, .footer-inner { padding-inline: calc(var(--gutter) + var(--space-4)); }
   .layout {
     grid-template-columns: minmax(0, 1fr) 300px;
     grid-template-rows: minmax(0, 1fr);
@@ -931,7 +932,9 @@ button, input, textarea {
     border-radius: var(--radius-xs);
     box-shadow: none;
   }
-  .trace-close, .trace-toggle { display: none; }
+  .trace-close { display: none; }
+  .layout.is-trace-hidden { grid-template-columns: minmax(0, 1fr); }
+  .layout.is-trace-hidden .trace { display: none; }
   .scrim { display: none !important; }
   .footer-inner { flex-direction: row; justify-content: space-between; align-items: center; }
   .site-footer { padding-block: var(--space-2); }

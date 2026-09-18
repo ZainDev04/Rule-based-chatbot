@@ -12,7 +12,7 @@
   "use strict";
 
   var CONFIG = window.NOVA_CONFIG || { botName: "Nova", maxLength: 500 };
-  var STORAGE = { session: "nova.session", state: "nova.state", trace: "nova.trace", history: "nova.history", theme: "nova.theme" };
+  var STORAGE = { session: "nova.session", state: "nova.state", trace: "nova.trace", history: "nova.history", theme: "nova.theme", traceColumn: "nova.trace-column" };
   var HISTORY_LIMIT = 60;
   var THINK_DELAY_MS = 350; // small pause so the typing indicator is visible
 
@@ -36,6 +36,7 @@
     traceClose: $("trace-close"),
     tracePanel: $("trace-panel"),
     scrim: $("scrim"),
+    layout: document.querySelector(".layout"),
     traceEmpty: $("trace-empty"),
     traceList: $("trace-list"),
     traceRaw: $("trace-raw"),
@@ -149,9 +150,40 @@
     if (lastFocusBeforeTrace && lastFocusBeforeTrace.focus) lastFocusBeforeTrace.focus();
   }
 
+  // From 768px the trace is a column that can be hidden; below that the same
+  // button opens it as a bottom sheet.
+  var wideScreen = window.matchMedia("(min-width: 768px)");
+
+  function setTraceColumn(shown) {
+    els.layout.classList.toggle("is-trace-hidden", !shown);
+    els.traceToggle.setAttribute("aria-expanded", shown ? "true" : "false");
+    els.traceToggle.setAttribute("aria-label", shown ? "Hide match trace" : "Show match trace");
+    els.traceToggle.querySelector(".btn-label").textContent = shown ? "Hide trace" : "Show trace";
+    writeStorage(STORAGE.traceColumn, shown);
+  }
+
+  function syncTraceToggle() {
+    if (wideScreen.matches) {
+      setTraceColumn(readStorage(STORAGE.traceColumn, true) !== false);
+    } else {
+      els.layout.classList.remove("is-trace-hidden");
+      els.traceToggle.setAttribute("aria-expanded", els.tracePanel.classList.contains("is-open") ? "true" : "false");
+      els.traceToggle.setAttribute("aria-label", "Match trace");
+      els.traceToggle.querySelector(".btn-label").textContent = "Trace";
+    }
+  }
+
   els.traceToggle.addEventListener("click", function () {
-    if (els.tracePanel.classList.contains("is-open")) closeTrace(); else openTrace();
+    if (wideScreen.matches) {
+      setTraceColumn(els.layout.classList.contains("is-trace-hidden"));
+    } else if (els.tracePanel.classList.contains("is-open")) {
+      closeTrace();
+    } else {
+      openTrace();
+    }
   });
+  if (wideScreen.addEventListener) wideScreen.addEventListener("change", syncTraceToggle);
+  syncTraceToggle();
   els.traceClose.addEventListener("click", closeTrace);
   els.scrim.addEventListener("click", closeTrace);
 
