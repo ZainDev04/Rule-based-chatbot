@@ -202,7 +202,7 @@ An intent that needs computed data adds a `handler` name and a method on `RuleBa
 
 Why a JSON file instead of Python dictionaries: the graded version kept intents in code, so adding one meant editing logic. Moving them to data made the engine generic, made the file testable on its own, and let the web interface list intents without importing anything private.
 
-Why four tiers instead of one big fuzzy match: fuzzy matching everything is slow and produces surprising hits. Trying the exact lookup first keeps the common path at one dictionary read, and each later tier only runs when the earlier ones fail. The tier name is returned with every reply, so the trade-off is visible instead of hidden.
+Why five tiers instead of one big fuzzy match: fuzzy matching everything is slow and produces surprising hits. Trying the exact lookup first keeps the common path at one dictionary read, and each later tier only runs when the earlier ones fail. The tier name is returned with every reply, so the trade-off is visible instead of hidden.
 
 Why an AST walker for arithmetic: `eval()` on user text is a remote code execution bug, even in a demo. Parsing to an AST and accepting only numbers and six operators gives the same result with no risk, and `test_safe_eval_rejects_non_arithmetic` makes sure it stays that way.
 
