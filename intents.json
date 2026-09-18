@@ -1,0 +1,1017 @@
+{
+  "meta": {
+    "version": "2.0",
+    "description": "Knowledge base for the Nova rule-based chatbot. Every entry here is data: the engine in chatbot.py never hard-codes an intent.",
+    "notes": [
+      "patterns: phrases the user might type. Matched in tiers: exact, then keyword (phrase inside a longer sentence), then fuzzy (typos).",
+      "exact_only: short or ambiguous phrases that should match only when the whole message equals them.",
+      "regex: named-group patterns for intents that need entity extraction. Groups become entities the handler can use.",
+      "reject: captured values that should not be accepted (used by the pattern tier to avoid false positives).",
+      "context: if present, the intent can only match when the previous matched intent is in this list.",
+      "handler: name of a dynamic handler in chatbot.py that computes placeholder values such as {time}.",
+      "responses: templates. Placeholders in braces are filled by the engine. Templates that need {user_name} are skipped until the user has shared a name.",
+      "alt_responses: used when a handler reports that the normal reply is not possible (for example, asking for a name that was never given)."
+    ]
+  },
+  "normalizations": {
+    "u": "you",
+    "ur": "your",
+    "r": "are",
+    "pls": "please",
+    "plz": "please",
+    "thx": "thanks",
+    "ty": "thanks",
+    "tysm": "thanks",
+    "wat": "what",
+    "wut": "what",
+    "whats": "what's",
+    "hows": "how's",
+    "im": "i'm",
+    "dont": "don't",
+    "cant": "can't",
+    "gud": "good",
+    "gr8": "great",
+    "k": "ok",
+    "kk": "ok",
+    "ya": "yes",
+    "yah": "yes",
+    "nah": "no",
+    "nope": "no",
+    "please": "",
+    "nova": "",
+    "bot": "",
+    "hey nova": "hey"
+  },
+  "exit_commands": [
+    "exit",
+    "quit",
+    "bye",
+    "goodbye",
+    "stop",
+    "see you",
+    "see ya",
+    "good bye",
+    "bye bye",
+    "ciao",
+    "take care"
+  ],
+  "goodbye_responses": [
+    "Goodbye! Have a great day.",
+    "See you later. Take care!",
+    "Bye for now. Come back any time."
+  ],
+  "empty_input_response": "Please type something so I can help you.",
+  "fallback": {
+    "responses": [
+      "I don't understand that yet. Could you rephrase it?",
+      "I'm not sure what you mean. Try asking something else, or type 'help' to see what I can do.",
+      "That is outside my rule set. Type 'help' to see the kinds of things I understand."
+    ]
+  },
+  "intents": [
+    {
+      "name": "greeting",
+      "description": "The user says hello.",
+      "patterns": [
+        "hello",
+        "hi",
+        "hey",
+        "hi there",
+        "hello there",
+        "hey there",
+        "good morning",
+        "good afternoon",
+        "good evening",
+        "greetings",
+        "howdy",
+        "yo",
+        "hiya",
+        "salam",
+        "assalam o alaikum",
+        "assalamualaikum",
+        "what's up",
+        "sup",
+        "nice to meet you",
+        "pleased to meet you",
+        "good to meet you",
+        "nice meeting you"
+      ],
+      "responses": [
+        "Hello! How can I help you today?",
+        "Hi there! What can I do for you?",
+        "Hey! Good to see you.",
+        "Hello, {user_name}! Nice to see you again.",
+        "Hi {user_name}! What can I do for you today?"
+      ]
+    },
+    {
+      "name": "how_are_you",
+      "description": "The user asks how the bot is doing.",
+      "patterns": [
+        "how are you",
+        "how are you doing",
+        "how is it going",
+        "how's it going",
+        "how do you do",
+        "how are things",
+        "how are you today",
+        "how have you been",
+        "you good",
+        "are you okay",
+        "are you ok",
+        "how is your day"
+      ],
+      "responses": [
+        "I'm just a set of rules, but I'm running smoothly. How about you?",
+        "Doing well, thanks for asking. How are you?",
+        "All systems normal on my side. How is your day going?"
+      ]
+    },
+    {
+      "name": "mood_good",
+      "description": "The user says they are doing well.",
+      "patterns": [
+        "i am good",
+        "i'm good",
+        "i am fine",
+        "i'm fine",
+        "i am great",
+        "i'm great",
+        "doing great",
+        "doing good",
+        "doing well",
+        "i am well",
+        "i'm well",
+        "all good",
+        "not bad",
+        "pretty good",
+        "i am okay",
+        "i'm okay",
+        "i am ok",
+        "i'm ok",
+        "i am happy",
+        "i'm happy",
+        "feeling good",
+        "feeling great",
+        "never better",
+        "i am doing good",
+        "i am doing great",
+        "i'm doing good",
+        "i'm doing great"
+      ],
+      "exact_only": [
+        "good",
+        "great",
+        "fine",
+        "okay",
+        "ok",
+        "well",
+        "awesome",
+        "fantastic",
+        "excellent"
+      ],
+      "responses": [
+        "That's good to hear!",
+        "Glad you're doing well.",
+        "Nice. What can I do for you?",
+        "Good to hear, {user_name}."
+      ]
+    },
+    {
+      "name": "mood_bad",
+      "description": "The user says they are not doing well.",
+      "patterns": [
+        "i am sad",
+        "i'm sad",
+        "not good",
+        "not great",
+        "not so good",
+        "i am tired",
+        "i'm tired",
+        "i am not okay",
+        "i'm not okay",
+        "i am not ok",
+        "feeling down",
+        "i feel sad",
+        "i feel bad",
+        "bad day",
+        "i am stressed",
+        "i'm stressed",
+        "i am upset",
+        "i'm upset",
+        "i am angry",
+        "i'm angry",
+        "i feel low",
+        "i am exhausted",
+        "i'm exhausted",
+        "i am unwell",
+        "i am sick",
+        "i'm sick",
+        "i am depressed",
+        "i'm depressed",
+        "not well",
+        "i am lonely",
+        "i'm lonely"
+      ],
+      "exact_only": [
+        "sad",
+        "tired",
+        "bad",
+        "terrible",
+        "awful",
+        "meh",
+        "stressed",
+        "upset"
+      ],
+      "responses": [
+        "I'm sorry to hear that. I hope things get better soon.",
+        "That sounds tough. Take it easy on yourself.",
+        "Sorry you're feeling that way. If a joke would help, just ask for one.",
+        "I'm sorry, {user_name}. I hope the rest of your day is kinder."
+      ]
+    },
+    {
+      "name": "reciprocal",
+      "description": "The user turns a question back to the bot.",
+      "patterns": [
+        "and you",
+        "what about you",
+        "how about you",
+        "and yourself",
+        "same to you",
+        "and how are you"
+      ],
+      "responses": [
+        "I'm doing fine, thanks for asking.",
+        "Running smoothly, as always.",
+        "All good here."
+      ],
+      "exact_only": [
+        "you"
+      ]
+    },
+    {
+      "name": "name",
+      "description": "The user asks who the bot is.",
+      "patterns": [
+        "what is your name",
+        "what's your name",
+        "who are you",
+        "your name",
+        "tell me your name",
+        "what should i call you",
+        "introduce yourself",
+        "do you have a name",
+        "may i know your name",
+        "what do they call you"
+      ],
+      "responses": [
+        "I'm {bot_name}, a rule-based chatbot.",
+        "You can call me {bot_name}.",
+        "My name is {bot_name}. I answer using a fixed set of rules, no machine learning involved."
+      ]
+    },
+    {
+      "name": "time",
+      "description": "The user asks for the current time.",
+      "handler": "time",
+      "patterns": [
+        "what time is it",
+        "current time",
+        "what's the time",
+        "what is the time",
+        "tell me the time",
+        "time now",
+        "the time",
+        "time please",
+        "do you know the time",
+        "what time is it now",
+        "got the time",
+        "what is the time right now"
+      ],
+      "exact_only": [
+        "time"
+      ],
+      "responses": [
+        "The current time is {time} (PKT).",
+        "It's {time} in Pakistan Standard Time."
+      ]
+    },
+    {
+      "name": "date",
+      "description": "The user asks for today's date.",
+      "handler": "date",
+      "patterns": [
+        "what is the date",
+        "what's the date",
+        "today's date",
+        "what is today's date",
+        "date today",
+        "current date",
+        "what date is it",
+        "what is the date today",
+        "tell me the date",
+        "which date is it"
+      ],
+      "exact_only": [
+        "date"
+      ],
+      "responses": [
+        "Today is {date}.",
+        "The date today is {date}."
+      ]
+    },
+    {
+      "name": "day",
+      "description": "The user asks which day of the week it is.",
+      "handler": "day",
+      "patterns": [
+        "what day is it",
+        "which day is it",
+        "what day is today",
+        "which day is today",
+        "day today",
+        "what day of the week is it",
+        "is it weekend",
+        "is it the weekend",
+        "what day is it today"
+      ],
+      "responses": [
+        "Today is {day}.",
+        "It's {day} today."
+      ]
+    },
+    {
+      "name": "thanks",
+      "description": "The user thanks the bot.",
+      "patterns": [
+        "thank you",
+        "thanks",
+        "thank you so much",
+        "thanks a lot",
+        "much appreciated",
+        "appreciate it",
+        "thanks a bunch",
+        "thank you very much",
+        "cheers",
+        "thanks nova",
+        "that was helpful",
+        "that helps"
+      ],
+      "responses": [
+        "You're welcome!",
+        "Any time. Happy to help.",
+        "No problem at all.",
+        "You're welcome, {user_name}."
+      ]
+    },
+    {
+      "name": "help",
+      "description": "The user asks what the bot can do.",
+      "handler": "help",
+      "patterns": [
+        "help",
+        "what can you do",
+        "options",
+        "commands",
+        "what do you know",
+        "how can you help",
+        "how can you help me",
+        "what are you capable of",
+        "menu",
+        "show help",
+        "help me",
+        "what can i ask",
+        "what can i ask you",
+        "what do you do",
+        "i need help",
+        "can you help me",
+        "can you help"
+      ],
+      "responses": [
+        "I currently know {intent_count} intents. You can ask about my name, the time, the date, or the day, ask for a joke, a coin flip, a dice roll, or a bit of arithmetic like 12 * 7. Tell me your name and I'll remember it. Type 'list intents' to see everything."
+      ]
+    },
+    {
+      "name": "list_intents",
+      "description": "The user asks for the full list of intents.",
+      "handler": "list_intents",
+      "patterns": [
+        "list intents",
+        "show intents",
+        "what intents do you have",
+        "which intents",
+        "list all intents",
+        "show me the intents",
+        "what intents do you know",
+        "list your rules",
+        "show rules",
+        "what rules do you have"
+      ],
+      "responses": [
+        "Here are the {intent_count} intents I know: {intent_list}."
+      ]
+    },
+    {
+      "name": "creator",
+      "description": "The user asks who built the bot.",
+      "patterns": [
+        "who made you",
+        "who created you",
+        "who built you",
+        "who developed you",
+        "who is your creator",
+        "who programmed you",
+        "who designed you",
+        "who coded you",
+        "who is your developer",
+        "who wrote you",
+        "who is your author"
+      ],
+      "responses": [
+        "I was built by Shaikh Muhammad Zain as Project 1 of the DecodeLabs AI internship.",
+        "Shaikh Muhammad Zain wrote me in Python for the DecodeLabs AI internship."
+      ]
+    },
+    {
+      "name": "about_project",
+      "description": "The user asks what the bot is or how it works.",
+      "patterns": [
+        "what is this project",
+        "tell me about this project",
+        "what is this",
+        "how do you work",
+        "are you an ai",
+        "are you a real ai",
+        "do you use machine learning",
+        "are you chatgpt",
+        "how were you built",
+        "what are you",
+        "are you an llm",
+        "do you use gpt",
+        "how do you understand me",
+        "are you intelligent",
+        "what technology do you use",
+        "what language are you written in",
+        "explain yourself",
+        "how do you match intents",
+        "what is a rule based chatbot"
+      ],
+      "responses": [
+        "I'm a rule-based chatbot written in Python. Every message goes through four steps: clean the text, look it up in a dictionary of known phrases, fall back to keyword and fuzzy matching, then pick a reply. There is no machine learning and no network call, so every answer is traceable to a rule.",
+        "No neural networks here. I map what you type to an intent using dictionary lookups, keyword search, and a fuzzy matcher for typos. If nothing matches, I say so instead of guessing."
+      ]
+    },
+    {
+      "name": "remember_name",
+      "description": "The user tells the bot their name.",
+      "handler": "remember_name",
+      "patterns": [],
+      "regex": [
+        "^(?:my name is|my name's|call me|you can call me|i am called|this is|it's me|people call me|i go by) (?P<name>[a-z][a-z'\\-]{1,30})$",
+        "^(?:i am|i'm) (?P<name>[a-z][a-z'\\-]{1,30})$"
+      ],
+      "reject": [
+        "a",
+        "alone",
+        "an",
+        "angry",
+        "asking",
+        "back",
+        "bad",
+        "bored",
+        "busy",
+        "cold",
+        "confused",
+        "curious",
+        "depressed",
+        "done",
+        "early",
+        "excited",
+        "exhausted",
+        "fine",
+        "free",
+        "glad",
+        "going",
+        "good",
+        "grateful",
+        "great",
+        "happy",
+        "here",
+        "home",
+        "hot",
+        "human",
+        "hungry",
+        "impressed",
+        "interested",
+        "joking",
+        "just",
+        "kidding",
+        "late",
+        "learning",
+        "leaving",
+        "listening",
+        "lonely",
+        "lost",
+        "lucky",
+        "nervous",
+        "new",
+        "not",
+        "ok",
+        "okay",
+        "ready",
+        "sad",
+        "scared",
+        "serious",
+        "sick",
+        "sleepy",
+        "so",
+        "sorry",
+        "stressed",
+        "student",
+        "sure",
+        "testing",
+        "thankful",
+        "the",
+        "tired",
+        "unwell",
+        "upset",
+        "very",
+        "waiting",
+        "well",
+        "wondering"
+      ],
+      "responses": [
+        "Nice to meet you, {user_name}! I'll remember that.",
+        "Hello {user_name}, good to meet you.",
+        "Got it, {user_name}. I'll keep that in mind for the rest of our chat."
+      ]
+    },
+    {
+      "name": "recall_name",
+      "description": "The user asks whether the bot remembers their name.",
+      "handler": "recall_name",
+      "patterns": [
+        "what is my name",
+        "what's my name",
+        "do you know my name",
+        "who am i",
+        "remember my name",
+        "say my name",
+        "do you remember me",
+        "do you remember my name",
+        "tell me my name",
+        "what did i say my name was"
+      ],
+      "responses": [
+        "Your name is {user_name}.",
+        "You told me your name is {user_name}."
+      ],
+      "alt_responses": [
+        "You haven't told me your name yet. Try saying 'my name is ...'.",
+        "I don't know it yet. Tell me with 'my name is' followed by your name."
+      ]
+    },
+    {
+      "name": "math",
+      "description": "The user asks for a basic calculation.",
+      "handler": "math",
+      "patterns": [],
+      "regex": [
+        "^(?:what is|what's|calculate|compute|solve|evaluate|how much is|what does)?\\s*(?P<expr>(?:\\d|[\\s+\\-*/().%^]|plus|minus|times|multiplied by|divided by|over|into|x|to the power of|squared|mod)+?)\\s*(?:=|equal|equals|equal to|\\?)?$"
+      ],
+      "responses": [
+        "{expr} = {result}",
+        "That comes to {result}."
+      ],
+      "alt_responses": [
+        "I can't compute that one. I handle + - * / % and ^ with plain numbers.",
+        "That expression doesn't work. Try something like 12 * 7 or (8 + 2) / 5."
+      ]
+    },
+    {
+      "name": "joke",
+      "description": "The user asks for a joke.",
+      "patterns": [
+        "tell me a joke",
+        "joke",
+        "make me laugh",
+        "say something funny",
+        "another joke",
+        "do you know any jokes",
+        "tell me another joke",
+        "one more joke",
+        "got any jokes",
+        "i want a joke",
+        "tell a joke",
+        "be funny",
+        "cheer me up"
+      ],
+      "responses": [
+        "Why do programmers prefer dark mode? Because light attracts bugs.",
+        "I told my computer I needed a break. It said: no problem, I'll go to sleep.",
+        "There are 10 kinds of people in the world: those who understand binary and those who don't.",
+        "Why did the developer go broke? Because they used up all their cache.",
+        "A SQL query walks into a bar, walks up to two tables and asks: can I join you?",
+        "Why was the JavaScript developer sad? Because they didn't know how to null their feelings.",
+        "How many programmers does it take to change a light bulb? None, that's a hardware problem."
+      ]
+    },
+    {
+      "name": "coin_flip",
+      "description": "The user asks the bot to flip a coin.",
+      "handler": "coin_flip",
+      "patterns": [
+        "flip a coin",
+        "coin flip",
+        "toss a coin",
+        "heads or tails",
+        "coin toss",
+        "flip coin",
+        "toss coin",
+        "flip the coin"
+      ],
+      "responses": [
+        "I flipped a coin and got {coin}.",
+        "{coin}!",
+        "The coin landed on {coin}."
+      ]
+    },
+    {
+      "name": "dice_roll",
+      "description": "The user asks the bot to roll a die.",
+      "handler": "dice_roll",
+      "patterns": [
+        "roll a dice",
+        "roll a die",
+        "roll dice",
+        "throw a dice",
+        "roll the dice",
+        "random number",
+        "give me a random number",
+        "roll",
+        "throw the dice",
+        "dice"
+      ],
+      "responses": [
+        "You rolled a {dice}.",
+        "The die shows {dice}.",
+        "It's a {dice}!"
+      ]
+    },
+    {
+      "name": "weather",
+      "description": "The user asks about the weather, which the bot cannot answer.",
+      "patterns": [
+        "what is the weather",
+        "what's the weather",
+        "weather",
+        "how's the weather",
+        "how is the weather",
+        "is it raining",
+        "weather today",
+        "will it rain",
+        "what is the temperature",
+        "is it hot outside",
+        "is it cold outside",
+        "weather forecast",
+        "what's the weather like"
+      ],
+      "responses": [
+        "I don't have access to live weather data. As a rule-based bot, I can only answer what's written in my rule set.",
+        "Weather needs a live data source, and I don't make network calls. A weather API would be the first thing to add if this bot grew up."
+      ]
+    },
+    {
+      "name": "age",
+      "description": "The user asks how old the bot is.",
+      "patterns": [
+        "how old are you",
+        "what is your age",
+        "what's your age",
+        "when were you born",
+        "your age",
+        "when is your birthday",
+        "what is your birthday",
+        "are you old"
+      ],
+      "responses": [
+        "I was written in June 2026, so I'm quite new.",
+        "Age is a strange idea for a script, but my first commit was in June 2026."
+      ]
+    },
+    {
+      "name": "location",
+      "description": "The user asks where the bot is.",
+      "patterns": [
+        "where are you",
+        "where do you live",
+        "where are you from",
+        "which country are you from",
+        "where are you located",
+        "where are you based",
+        "what is your location",
+        "where were you made",
+        "which city are you in"
+      ],
+      "responses": [
+        "I was written in Karachi, Pakistan, and I run wherever this Python script is started.",
+        "I live in a Python process. My author is in Karachi, Pakistan."
+      ]
+    },
+    {
+      "name": "compliment",
+      "description": "The user says something kind about the bot.",
+      "patterns": [
+        "you are great",
+        "you're great",
+        "you are awesome",
+        "you're awesome",
+        "good bot",
+        "you are smart",
+        "you're smart",
+        "nice bot",
+        "well done",
+        "good job",
+        "you're cool",
+        "you are cool",
+        "i like you",
+        "you are the best",
+        "you're the best",
+        "you are amazing",
+        "you're amazing",
+        "you are helpful",
+        "you're helpful",
+        "you are clever",
+        "you're clever",
+        "good work",
+        "great job"
+      ],
+      "responses": [
+        "Thank you! That means a lot, even to a set of rules.",
+        "That's kind of you to say.",
+        "Thanks! I'll pass the credit to my author."
+      ],
+      "exact_only": [
+        "nice",
+        "impressive",
+        "wow",
+        "cool"
+      ]
+    },
+    {
+      "name": "insult",
+      "description": "The user is rude to the bot.",
+      "patterns": [
+        "you are stupid",
+        "you're stupid",
+        "you are dumb",
+        "you're dumb",
+        "you are useless",
+        "you're useless",
+        "bad bot",
+        "you suck",
+        "shut up",
+        "i hate you",
+        "you are boring",
+        "you're boring",
+        "you are annoying",
+        "you're annoying",
+        "stupid bot",
+        "dumb bot",
+        "you are bad",
+        "you're bad",
+        "idiot",
+        "you idiot"
+      ],
+      "responses": [
+        "Fair enough. I'm limited to my rules, but I'm doing my best.",
+        "Sorry I let you down. Type 'help' to see what I can actually do.",
+        "Noted. I'll keep trying."
+      ]
+    },
+    {
+      "name": "feelings",
+      "description": "The user asks whether the bot is alive or has feelings.",
+      "patterns": [
+        "do you have feelings",
+        "are you alive",
+        "are you human",
+        "are you a robot",
+        "are you real",
+        "can you think",
+        "do you dream",
+        "are you a person",
+        "are you conscious",
+        "do you feel",
+        "are you sentient",
+        "are you a machine",
+        "do you sleep",
+        "do you eat",
+        "do you get tired"
+      ],
+      "responses": [
+        "No feelings here. I'm a Python script that matches your words against a list of rules.",
+        "I'm not alive, and I don't think. Every reply I give was written by a person ahead of time.",
+        "I'm a program. I don't feel, sleep, or dream, but I do respond quickly."
+      ]
+    },
+    {
+      "name": "favorite",
+      "description": "The user asks about the bot's preferences.",
+      "patterns": [
+        "what is your favorite color",
+        "what's your favorite color",
+        "favorite color",
+        "favourite colour",
+        "what is your favourite colour",
+        "what is your favorite food",
+        "favorite food",
+        "do you like music",
+        "what do you like",
+        "what is your hobby",
+        "what are your hobbies",
+        "what is your favorite movie",
+        "favorite movie",
+        "what is your favorite language",
+        "favorite programming language"
+      ],
+      "responses": [
+        "If I had to pick, I'd say green. It's the colour of my interface.",
+        "I'm partial to Python, since it's what I'm written in.",
+        "I don't have preferences, but my author likes clean code and dark mode."
+      ]
+    },
+    {
+      "name": "acknowledge",
+      "description": "The user gives a short yes, no, or ok.",
+      "patterns": [],
+      "exact_only": [
+        "yes",
+        "no",
+        "yeah",
+        "yep",
+        "sure",
+        "ok",
+        "okay",
+        "alright",
+        "right",
+        "correct",
+        "got it",
+        "i see",
+        "oh",
+        "hmm",
+        "hm",
+        "fine then"
+      ],
+      "responses": [
+        "Got it.",
+        "Alright.",
+        "Okay. What next?",
+        "Understood."
+      ]
+    },
+    {
+      "name": "bored",
+      "description": "The user says they are bored.",
+      "patterns": [
+        "i am bored",
+        "i'm bored",
+        "bored",
+        "entertain me",
+        "i have nothing to do",
+        "i am so bored",
+        "i'm so bored",
+        "this is boring",
+        "what should i do",
+        "i feel bored"
+      ],
+      "responses": [
+        "I can tell you a joke, flip a coin, or roll a die. Pick one.",
+        "Try asking for a joke, or give me a sum like 25 * 4 to solve."
+      ]
+    },
+    {
+      "name": "apology",
+      "description": "The user apologises.",
+      "patterns": [
+        "sorry",
+        "i'm sorry",
+        "i am sorry",
+        "my bad",
+        "apologies",
+        "excuse me",
+        "pardon me",
+        "my apologies",
+        "so sorry",
+        "sorry about that"
+      ],
+      "responses": [
+        "No need to apologise.",
+        "It's fine, really.",
+        "All good. What can I do for you?"
+      ]
+    },
+    {
+      "name": "love",
+      "description": "The user expresses affection.",
+      "patterns": [
+        "i love you",
+        "will you marry me",
+        "do you love me",
+        "i like you a lot",
+        "be my friend",
+        "will you be my friend",
+        "are you single",
+        "do you have a girlfriend",
+        "do you have a boyfriend",
+        "marry me"
+      ],
+      "responses": [
+        "That's sweet, but I'm a script. Friends is the best I can offer.",
+        "I appreciate it. My heart is a dictionary, and it has room for you as a key.",
+        "Friends it is. I'm here whenever you want to chat."
+      ]
+    },
+    {
+      "name": "repeat",
+      "description": "The user asks the bot to repeat its last reply.",
+      "handler": "repeat",
+      "patterns": [
+        "say that again",
+        "what did you say",
+        "come again",
+        "repeat that",
+        "say it again",
+        "can you repeat that",
+        "sorry what",
+        "i didn't get that",
+        "i did not get that",
+        "once more"
+      ],
+      "responses": [
+        "I said: {last_reply}",
+        "Sure. {last_reply}"
+      ],
+      "alt_responses": [
+        "I haven't said anything yet. Ask me something first.",
+        "Nothing to repeat yet."
+      ],
+      "exact_only": [
+        "what",
+        "again",
+        "repeat",
+        "pardon",
+        "huh",
+        "eh"
+      ]
+    },
+    {
+      "name": "whats_new",
+      "description": "The user asks what is happening.",
+      "patterns": [
+        "what's new",
+        "anything new",
+        "what is new",
+        "what's happening",
+        "what is happening",
+        "what's going on",
+        "what is going on",
+        "any news",
+        "what have you been up to"
+      ],
+      "responses": [
+        "Nothing new on my end. Same rules, same replies, ready when you are.",
+        "Not much. I've been waiting here for a message."
+      ]
+    },
+    {
+      "name": "user_thanks_bye",
+      "description": "The user signals they are done but has not used an exit word.",
+      "patterns": [
+        "i have to go",
+        "i've to go",
+        "i need to go",
+        "got to go",
+        "gotta go",
+        "talk later",
+        "talk to you later",
+        "i'll be back",
+        "brb",
+        "leaving now",
+        "that's all",
+        "that is all",
+        "nothing else",
+        "i'm done",
+        "i am done",
+        "that's it",
+        "that is it"
+      ],
+      "responses": [
+        "Alright. Type 'bye' when you want to end the session, or just close the tab.",
+        "No problem. I'll be here if you come back.",
+        "Sure thing. Take care, {user_name}."
+      ]
+    }
+  ]
+}
