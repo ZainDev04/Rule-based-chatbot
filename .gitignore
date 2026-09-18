@@ -25,3 +25,6 @@ logs/
 # Local screenshots and scratch files
 *.png
 *.jpg
+
+# Personal study guide, not part of the public repo
+guide.pdf
