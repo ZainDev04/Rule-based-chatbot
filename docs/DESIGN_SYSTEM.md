@@ -154,6 +154,8 @@ States:
 - loading: the Send button carries the loading state; the textarea stays editable.
 - error: `aria-invalid="true"`, error border, message in `#form-error` with `role="alert"`.
 
+Placement: pinned at every width. The body is `100dvh` and only the message log scrolls, so the composer and the footer stay in view on phones as well as on desktop. Below 620px of height the suggestion chips and the chat subtitle are dropped to leave room for the log.
+
 Behaviour: Enter sends, Shift+Enter inserts a newline, Escape clears. The textarea grows with content up to 144px (six lines) and then scrolls. `maxlength` is 500; the counter is hidden while the box is empty and turns red at 450. Empty submissions show "Type a message first." instead of sending.
 
 Edge cases: a 500-character message wraps inside the box; pasted newlines are kept; whitespace-only input counts as empty.

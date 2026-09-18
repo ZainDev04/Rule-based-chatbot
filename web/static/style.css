@@ -151,7 +151,7 @@ html {
 
 body {
   margin: 0;
-  min-height: 100%;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   background: var(--color-surface-base);
@@ -386,10 +386,12 @@ button, input, textarea {
    -------------------------------------------------------------------------- */
 .layout {
   flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: var(--space-4);
-  padding-block: var(--space-3) var(--space-4);
+  padding-block: var(--space-3);
 }
 
 /* --------------------------------------------------------------------------
@@ -398,7 +400,8 @@ button, input, textarea {
 .chat {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - var(--header-height) - 140px);
+  min-height: 0;
+  height: 100%;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xs);
   background: var(--color-surface-raised);
@@ -421,7 +424,7 @@ button, input, textarea {
 
 .messages {
   flex: 1;
-  min-height: 240px;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--space-3);
@@ -835,7 +838,7 @@ button, input, textarea {
   color: var(--color-text-on-inverse-muted);
   border-top: 2px solid var(--color-accent);
   font-size: var(--font-size-sm);
-  padding-block: var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+  padding-block: var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom));
 }
 .footer-inner {
   display: flex;
@@ -894,26 +897,18 @@ button, input, textarea {
   .btn-header { padding-inline: var(--space-3); }
 }
 
-/* Tablets and up: two columns. The page fills the viewport exactly; the
-   chat log and the trace column scroll inside their panels, so the document
-   itself has nothing to scroll and the footer stays in view. */
+/* Tablets and up: two columns. At every width the page fills the viewport
+   and only the chat log and the trace column scroll, so the composer and
+   the footer stay in view. */
 @media (min-width: 768px) {
   :root { --gutter: 24px; }
-  body { height: 100dvh; }
   .header-inner, .footer-inner { padding-inline: calc(var(--gutter) + var(--space-4)); }
   .layout {
     grid-template-columns: minmax(0, 1fr) 300px;
-    grid-template-rows: minmax(0, 1fr);
-    gap: var(--space-4);
     padding-block: var(--space-4);
-    min-height: 0;
     align-items: stretch;
   }
-  .chat {
-    min-height: 0;
-    height: 100%;
-  }
-  .messages { padding: var(--space-4); min-height: 0; }
+  .messages { padding: var(--space-4); }
   .msg { max-width: 75%; }
   .chips { flex-wrap: wrap; overflow: visible; }
   .chip { flex: none; }
@@ -937,7 +932,6 @@ button, input, textarea {
   .layout.is-trace-hidden .trace { display: none; }
   .scrim { display: none !important; }
   .footer-inner { flex-direction: row; justify-content: space-between; align-items: center; }
-  .site-footer { padding-block: var(--space-2); }
   .footer-nav { flex: none; flex-wrap: nowrap; }
   .footer-nav a { min-height: 36px; }
 }
@@ -952,11 +946,9 @@ button, input, textarea {
 
 /* Very short viewports (landscape phones): keep the composer reachable. */
 @media (max-height: 480px) {
-  .chat { min-height: 0; }
-  .messages { min-height: 120px; }
   .suggestions { display: none; }
 }
-@media (min-width: 768px) and (max-height: 620px) {
+@media (max-height: 620px) {
   .suggestions { display: none; }
   .chat-subtitle { display: none; }
 }
