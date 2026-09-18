@@ -119,9 +119,24 @@ class Session:
         return {
             "user_name": self.user_name,
             "last_intent": self.last_intent,
+            "last_reply": self.last_reply,
             "turn_count": self.turn_count,
             "started_at": self.started_at.isoformat(),
         }
+
+    def restore(self, data: dict) -> None:
+        """Load state that a client sent back. Used on hosts where each request
+        may hit a different process, so the browser carries its own memory."""
+        if not isinstance(data, dict):
+            return
+        name = data.get("user_name")
+        self.user_name = name[:40] if isinstance(name, str) and name.strip() else None
+        intent = data.get("last_intent")
+        self.last_intent = intent if isinstance(intent, str) and len(intent) <= 40 else None
+        reply = data.get("last_reply")
+        self.last_reply = reply[:1000] if isinstance(reply, str) and reply else None
+        turns = data.get("turn_count")
+        self.turn_count = turns if isinstance(turns, int) and 0 <= turns <= 100000 else 0
 
 
 # --------------------------------------------------------------------------

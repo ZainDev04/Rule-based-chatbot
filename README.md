@@ -106,7 +106,9 @@ The interface follows the Renovast design tokens (Helvetica Neue, 16px base, 4px
 | GET | `/api/intents` | | count and a summary of every intent |
 | GET | `/api/health` | | uptime, sessions, requests served, fallback rate |
 
-Messages over 500 characters return 413, malformed bodies return 400, and more than 60 requests a minute from one client return 429. Errors are JSON with a `code` and a `message`. Sessions live in memory, expire after an hour idle, and are capped at 500.
+Messages over 500 characters return 413, malformed bodies return 400, and more than 60 requests a minute from one client return 429. Errors are JSON with a `code` and a `message`.
+
+Sessions live in memory on the server, expire after an hour idle, and are capped at 500. Every reply also returns the session state (`user_name`, `last_intent`, `last_reply`, `turn_count`), and the browser sends it back as `session_state` on the next request. That keeps memory working on serverless hosts such as Vercel, where two requests in a row may run in different processes.
 
 ```bash
 curl -s -X POST http://127.0.0.1:5000/api/chat \
@@ -120,7 +122,10 @@ curl -s -X POST http://127.0.0.1:5000/api/chat \
 rule-based-chatbot/
 ├── chatbot.py              engine and terminal runner
 ├── intents.json            knowledge base: 34 intents, patterns, responses, normalisations
-├── requirements.txt        Flask and pytest
+├── requirements.txt        Flask (runtime)
+├── requirements-dev.txt    adds pytest
+├── wsgi.py                 root entrypoint for Vercel
+├── vercel.json             keeps tests and docs out of the function bundle
 ├── tests/
 │   ├── test_sanitize.py    input normalisation
 │   ├── test_matching.py    each matching tier
@@ -138,6 +143,7 @@ rule-based-chatbot/
 ## Tests
 
 ```bash
+pip install -r requirements-dev.txt
 pytest -q
 ```
 
@@ -173,14 +179,27 @@ Why sessions in a dictionary: the demo runs as a single process on PythonAnywher
 
 Why the trace panel: in an interview, the interesting part of a rule-based bot is the matching, not the replies. Showing the tier and confidence on every message turns the demo into an explanation.
 
-## Deploying to PythonAnywhere
+## Deployment
 
-1. Clone the repository into your home directory.
-2. Create a virtualenv and run `pip install -r requirements.txt`.
-3. In the Web tab, set the source directory to `Rule-based-chatbot/web` and point the WSGI file at `wsgi.py` (see the comment in that file for the three lines to paste).
-4. Reload the app. `/api/health` should return `"status": "ok"`.
+### Vercel
 
-Time replies use Pakistan Standard Time (UTC+5) explicitly because the server runs in UTC.
+The repository is set up for Vercel's Python preset: `wsgi.py` at the root exposes the Flask `app`, `requirements.txt` lists Flask, `.python-version` pins 3.12, and `vercel.json` excludes tests and docs from the function bundle.
+
+1. Sign in at vercel.com with GitHub and choose "Add New Project".
+2. Import `ZainDev04/Rule-based-chatbot`. Leave every setting at its default; Vercel detects Flask.
+3. Deploy. Every later push to `main` redeploys automatically.
+
+Or from the command line: `npm i -g vercel`, `vercel login`, then `vercel --prod` in the project folder.
+
+### PythonAnywhere
+
+1. Clone the repository into your home directory and run `pip install -r requirements.txt` in a virtualenv.
+2. In the Web tab, set the source directory to `Rule-based-chatbot/web` and point the WSGI file at `web/wsgi.py` (the comment in that file has the three lines to paste).
+3. Reload the app. `/api/health` should return `"status": "ok"`.
+
+Free PythonAnywhere apps expire after a month unless renewed from the dashboard, which is why the Vercel link is the primary one.
+
+Time replies use Pakistan Standard Time (UTC+5) explicitly because both hosts run in UTC.
 
 ## Limitations and next steps
 

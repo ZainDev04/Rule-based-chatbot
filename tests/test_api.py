@@ -99,3 +99,29 @@ def test_unknown_api_route_is_json(client):
 def test_security_headers(client):
     response = client.get("/api/health")
     assert response.headers["X-Content-Type-Options"] == "nosniff"
+
+
+def test_client_session_state_restores_memory(client):
+    """A new process (or a new test client) must honour the state the browser sends back."""
+    first = client.post("/api/chat", json={"message": "my name is zain", "session_id": "stateless-1"}).get_json()
+    assert first["session"]["user_name"] == "Zain"
+
+    from app import create_app as build
+    fresh = build(RuleBasedChatbot(seed=1)).test_client()
+    body = fresh.post("/api/chat", json={
+        "message": "what is my name",
+        "session_id": "stateless-1",
+        "session_state": first["session"],
+    }).get_json()
+    assert "Zain" in body["response"]
+    assert body["session"]["turn_count"] == 2
+
+
+def test_client_session_state_is_validated(client):
+    body = client.post("/api/chat", json={
+        "message": "what is my name",
+        "session_id": "stateless-2",
+        "session_state": {"user_name": 12345, "turn_count": 5, "last_reply": ["x"]},
+    }).get_json()
+    assert body["intent"] == "recall_name"
+    assert "12345" not in body["response"]

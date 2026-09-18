@@ -9,7 +9,8 @@ the browser.
 
 Routes
     GET  /               chat interface
-    POST /api/chat       {"message": str, "session_id": str} -> reply plus match trace
+    POST /api/chat       {"message": str, "session_id": str, "session_state": {...}?}
+                         -> reply plus match trace and the updated session state
     POST /api/reset      {"session_id": str}                  -> forget that session
     GET  /api/intents    list of loaded intents
     GET  /api/health     uptime and counters, used by monitoring
@@ -123,6 +124,14 @@ def create_app(bot: RuleBasedChatbot | None = None) -> Flask:
             session_id = uuid.uuid4().hex
 
         session = get_session(session_id)
+
+        # Serverless hosts (Vercel) may serve consecutive requests from
+        # different processes, so the browser sends back the state it was
+        # given last time. The newer copy wins.
+        client_state = data.get("session_state")
+        if isinstance(client_state, dict) and client_state.get("turn_count", 0) > session.turn_count:
+            session.restore(client_state)
+
         started = time.perf_counter()
         reply = app.bot.respond(message, session)
         elapsed_ms = round((time.perf_counter() - started) * 1000, 3)

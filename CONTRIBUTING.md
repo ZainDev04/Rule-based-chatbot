@@ -10,7 +10,7 @@ cd Rule-based-chatbot
 python -m venv .venv
 .venv\Scripts\activate        # Windows
 source .venv/bin/activate     # macOS and Linux
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pytest -q
 ```
 

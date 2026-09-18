@@ -12,7 +12,7 @@
   "use strict";
 
   var CONFIG = window.NOVA_CONFIG || { botName: "Nova", maxLength: 500 };
-  var STORAGE = { session: "nova.session", history: "nova.history", theme: "nova.theme" };
+  var STORAGE = { session: "nova.session", state: "nova.state", history: "nova.history", theme: "nova.theme" };
   var HISTORY_LIMIT = 60;
   var THINK_DELAY_MS = 350; // small pause so the typing indicator is visible
 
@@ -87,6 +87,7 @@
 
   var state = {
     sessionId: readStorage(STORAGE.session, null) || newSessionId(),
+    sessionState: readStorage(STORAGE.state, null),
     history: readStorage(STORAGE.history, []),
     busy: false
   };
@@ -355,7 +356,7 @@
     var request = fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, session_id: state.sessionId })
+      body: JSON.stringify({ message: text, session_id: state.sessionId, session_state: state.sessionState })
     });
 
     Promise.all([request, sleep(THINK_DELAY_MS)]).then(function (results) {
@@ -380,10 +381,15 @@
         kind: data.intent === "exit" ? "system" : undefined
       });
       updateTrace(data);
+      // Keep a copy of the memory so it survives a server restart or a new instance.
+      state.sessionState = data.session || null;
+      writeStorage(STORAGE.state, state.sessionState);
       if (data.session_ended) {
         // The server dropped this session; start a fresh one for the next message.
         state.sessionId = newSessionId();
+        state.sessionState = null;
         writeStorage(STORAGE.session, state.sessionId);
+        removeStorage(STORAGE.state);
         addMessage({ role: "bot", kind: "system", intent: "system", text: "Session ended. Your next message starts a new one." });
         els.sessionName.textContent = "unknown";
         els.sessionTurns.textContent = "0";
@@ -485,7 +491,9 @@
     }).catch(function () { /* offline: local clear still happens */ });
 
     state.history = [];
+    state.sessionState = null;
     removeStorage(STORAGE.history);
+    removeStorage(STORAGE.state);
     state.sessionId = newSessionId();
     writeStorage(STORAGE.session, state.sessionId);
 
@@ -516,6 +524,11 @@
   }
 
   restoreHistory();
+  if (state.sessionState) {
+    els.sessionName.textContent = state.sessionState.user_name || "unknown";
+    els.sessionTurns.textContent = state.sessionState.turn_count || 0;
+    els.sessionLast.textContent = state.sessionState.last_intent || "none";
+  }
   loadIntents();
   updateCharCount();
   fetch("/api/health").then(function (r) { setOnline(r.ok); }).catch(function () { setOnline(false); });
