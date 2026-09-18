@@ -21,3 +21,7 @@ Thumbs.db
 *.log
 logs/
 .env
+
+# Local screenshots and scratch files
+*.png
+*.jpg
