@@ -2,7 +2,7 @@
 
 DecodeLabs Industrial Training Kit, Artificial Intelligence, Project 1.
 
-Live demo: [rule-based-chatbot-smoky.vercel.app](https://rule-based-chatbot-smoky.vercel.app)
+Live demo: [nova-rule-based-chatbot.vercel.app](https://nova-rule-based-chatbot.vercel.app)
 Mirror: [zaindev04.pythonanywhere.com](https://zaindev04.pythonanywhere.com)
 
 Nova is a chatbot that answers with rules instead of a model. Every reply can be traced to a line in `intents.json`, which is the point of the project: before building systems that learn, build one you can fully explain. The terminal version is the graded deliverable. The web version wraps the same class in a small Flask API and shows the matching trace next to every reply.
