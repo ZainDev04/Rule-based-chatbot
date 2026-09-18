@@ -37,8 +37,8 @@ from pathlib import Path
 from typing import Callable, Optional
 
 # Pakistan Standard Time is UTC+5 with no daylight saving, so a fixed offset
-# is correct and avoids pulling in a timezone library. Servers such as
-# PythonAnywhere run in UTC, so "what time is it" would otherwise be wrong.
+# is correct and avoids pulling in a timezone library. Hosting servers run
+# in UTC, so "what time is it" would otherwise be wrong.
 PKT = timezone(timedelta(hours=5))
 
 DEFAULT_INTENTS_PATH = Path(__file__).with_name("intents.json")

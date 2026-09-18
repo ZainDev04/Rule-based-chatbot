@@ -56,8 +56,10 @@ def create_app(bot: RuleBasedChatbot | None = None) -> Flask:
     app.started_at = datetime.now(timezone.utc)
 
     # ---- in-memory state --------------------------------------------------
-    # One process serves all users on PythonAnywhere's free tier, so a dict
-    # is enough. A real deployment would move this to Redis.
+    # This dict is a per-process cache. The browser also carries the session
+    # state (see /api/chat), which is what makes memory work on serverless
+    # hosts. A multi-process deployment that wanted a shared cache would
+    # move this to Redis.
     sessions: dict[str, Session] = {}
     sessions_lock = threading.Lock()
     rate_buckets: dict[str, deque] = {}

@@ -3,7 +3,6 @@
 DecodeLabs Industrial Training Kit, Artificial Intelligence, Project 1.
 
 Live demo: [nova-rule-based-chatbot.vercel.app](https://nova-rule-based-chatbot.vercel.app)
-Mirror: [zaindev04.pythonanywhere.com](https://zaindev04.pythonanywhere.com)
 
 Nova is a chatbot that answers with rules instead of a model. Every reply can be traced to a line in `intents.json`, which is the point of the project: before building systems that learn, build one you can fully explain. The terminal version is the graded deliverable. The web version wraps the same class in a small Flask API and shows the matching trace next to every reply.
 
@@ -134,7 +133,6 @@ rule-based-chatbot/
 │   └── test_api.py         Flask routes, validation, sessions
 ├── web/
 │   ├── app.py              Flask application factory and API
-│   ├── wsgi.py             entry point for PythonAnywhere
 │   ├── templates/index.html
 │   └── static/style.css, script.js
 ├── docs/DESIGN_SYSTEM.md   tokens, component states, accessibility criteria
@@ -176,13 +174,11 @@ Why four tiers instead of one big fuzzy match: fuzzy matching everything is slow
 
 Why an AST walker for arithmetic: `eval()` on user text is a remote code execution bug, even in a demo. Parsing to an AST and accepting only numbers and six operators gives the same result with no risk, and `test_safe_eval_rejects_non_arithmetic` makes sure it stays that way.
 
-Why sessions in a dictionary: the demo runs as a single process on PythonAnywhere's free tier. A dictionary with idle expiry and a hard cap is enough. The session store is isolated behind two functions in `app.py`, so moving it to Redis is a local change.
+Why sessions travel with the browser: the demo runs on Vercel, where two requests in a row may land on different processes, so a server-side dictionary alone would forget the user's name. Each reply returns the session state and the browser sends it back. The server still keeps a dictionary as a cache, with idle expiry and a hard cap, and the newer copy wins. Moving the cache to Redis would be a change to two functions in `app.py`.
 
 Why the trace panel: in an interview, the interesting part of a rule-based bot is the matching, not the replies. Showing the tier and confidence on every message turns the demo into an explanation.
 
 ## Deployment
-
-### Vercel
 
 The repository is set up for Vercel's Python preset: `wsgi.py` at the root exposes the Flask `app`, `requirements.txt` lists Flask, `.python-version` pins 3.12, and `vercel.json` excludes tests and docs from the function bundle.
 
@@ -192,15 +188,9 @@ The repository is set up for Vercel's Python preset: `wsgi.py` at the root expos
 
 Or from the command line: `npm i -g vercel`, `vercel login`, then `vercel --prod` in the project folder.
 
-### PythonAnywhere
+Any other WSGI host works too: point it at `wsgi.py` (root) or `web.app:app`.
 
-1. Clone the repository into your home directory and run `pip install -r requirements.txt` in a virtualenv.
-2. In the Web tab, set the source directory to `Rule-based-chatbot/web` and point the WSGI file at `web/wsgi.py` (the comment in that file has the three lines to paste).
-3. Reload the app. `/api/health` should return `"status": "ok"`.
-
-Free PythonAnywhere apps expire after a month unless renewed from the dashboard, which is why the Vercel link is the primary one.
-
-Time replies use Pakistan Standard Time (UTC+5) explicitly because both hosts run in UTC.
+Time replies use Pakistan Standard Time (UTC+5) explicitly because the server runs in UTC.
 
 ## Limitations and next steps
 
