@@ -227,7 +227,7 @@
 
   // ------------------------------------------------------------- trace
 
-  var PIPELINE_ORDER = ["exact", "pattern", "keyword", "fuzzy"];
+  var PIPELINE_ORDER = ["exact", "pattern", "keyword", "fuzzy", "vector"];
 
   function updatePipeline(tier, intent) {
     var items = els.pipeline.querySelectorAll("li");

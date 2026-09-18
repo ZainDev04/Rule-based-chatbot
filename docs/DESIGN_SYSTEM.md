@@ -139,7 +139,7 @@ Keyboard: the row is a roving tabindex group. Tab enters the row on the first ch
 
 Responsive: below 768px the row scrolls horizontally with scroll snap and a thin scrollbar; from 768px it wraps. Chips never truncate; the text is the message.
 
-Edge cases: eight chips maximum in the row. The list is static and must include one example per tier (exact, pattern, keyword, fuzzy).
+Edge cases: eight chips maximum in the row. The list is static and must include one example per tier (exact, pattern, keyword, fuzzy, vector).
 
 ### 3.3 Message composer
 
@@ -188,7 +188,7 @@ States:
 - closed (phones): translated off screen and `visibility: hidden` so nothing inside is focusable.
 - open: `is-open` class, the toggle has `aria-expanded="true"`, focus moves to the panel, Escape or the scrim closes it and focus returns to the toggle.
 
-Pipeline list: step 1 is always marked tried. Steps before the hit are marked tried, the hit is marked with the accent, later steps stay neutral. A fallback marks step 6.
+Pipeline list: seven steps (sanitize, exact, pattern, keyword, fuzzy, vector, fallback). Step 1 is always marked tried. Steps before the hit are marked tried, the hit is marked with the accent, later steps stay neutral. A fallback marks step 7.
 
 Empty state: "Send a message to see how it was matched." Long values (a 500-character input) wrap inside the definition cell.
 

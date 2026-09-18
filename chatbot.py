@@ -9,7 +9,7 @@ no network calls, no guessing.
 
 Pipeline for each message:
 
-    raw text -> sanitize -> match (exact, pattern, keyword, fuzzy) -> handler -> reply
+    raw text -> sanitize -> match (exact, pattern, keyword, fuzzy, vector) -> handler -> reply
 
 Run it in the terminal:
 
@@ -26,11 +26,13 @@ import argparse
 import ast
 import difflib
 import json
+import math
 import operator
 import random
 import re
 import string
 import sys
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -46,6 +48,22 @@ DEFAULT_INTENTS_PATH = Path(__file__).with_name("intents.json")
 # Words shorter than this are never fuzzy-matched. "hi" is too close to "his".
 FUZZY_MIN_WORD_LENGTH = 4
 
+# Cosine similarity a paraphrase must reach in the vector tier.
+VECTOR_THRESHOLD = 0.55
+# A word found in more than this fraction of phrases is treated as filler.
+VECTOR_COMMON_FRACTION = 0.05
+# Share of a phrase's weight that the message must cover for a vector match.
+VECTOR_MIN_COVERAGE = 0.5
+# Used when intents.json does not supply its own stopword list.
+DEFAULT_STOPWORDS = {
+    "a", "an", "the", "i", "me", "my", "you", "your", "it", "its", "is", "are", "am", "was", "be",
+    "do", "does", "did", "can", "could", "would", "will", "to", "of", "in", "on", "at", "for", "with",
+    "and", "or", "so", "if", "this", "that", "there", "here", "what", "how", "who", "why", "when",
+    "which", "tell", "please", "some", "any", "have", "has", "just", "really", "very", "about",
+}
+# In the fuzzy tier, a swapped word must be at least this similar to count as a typo.
+FUZZY_WORD_RATIO = 0.8
+
 
 # --------------------------------------------------------------------------
 # Data containers
@@ -56,7 +74,7 @@ class MatchResult:
     """What the matcher found for one cleaned message."""
 
     intent: Optional[str]
-    tier: str                      # exact | pattern | keyword | fuzzy | none
+    tier: str                      # exact | pattern | keyword | fuzzy | vector | none
     confidence: float              # 0.0 to 1.0
     matched_phrase: Optional[str] = None
     entities: dict = field(default_factory=dict)
@@ -210,6 +228,84 @@ def format_number(value: float) -> str:
 
 
 # --------------------------------------------------------------------------
+# Vector tier: TF-IDF bag of words with cosine similarity
+# --------------------------------------------------------------------------
+
+class VectorIndex:
+    """Paraphrase matching without a model download.
+
+    Every known phrase becomes a sparse TF-IDF vector over its words (after
+    synonym substitution). A message is scored against all of them by cosine
+    similarity, and the best phrase wins if it clears VECTOR_THRESHOLD, shares
+    at least one content word with the message (not a stopword, and found in
+    fewer than VECTOR_COMMON_FRACTION of the phrases), and the shared words
+    cover at least VECTOR_MIN_COVERAGE of the phrase's weight. Those guards
+    stop "tell me" alone from matching "tell me a joke" on filler words.
+
+    This is what a neural embedding model would do with more nuance; the
+    trade-off is explained in the README. It is deterministic, has no
+    dependencies, and builds in a few milliseconds.
+    """
+
+    def __init__(
+        self,
+        phrases: dict[str, str],
+        synonyms: Optional[dict[str, str]] = None,
+        stopwords: Optional[set[str]] = None,
+    ) -> None:
+        self.synonyms = synonyms or {}
+        self.stopwords = stopwords if stopwords is not None else DEFAULT_STOPWORDS
+        docs = [(phrase, intent, self._tokens(phrase)) for phrase, intent in phrases.items()]
+        doc_count = max(len(docs), 1)
+        df: Counter = Counter()
+        for _, _, tokens in docs:
+            df.update(set(tokens))
+        self.df = df
+        self.idf = {t: math.log((doc_count + 1) / (n + 1)) + 1.0 for t, n in df.items()}
+        self.unknown_idf = max(self.idf.values(), default=1.0)
+        # Words in more than this many phrases ("you", "is", "what") are filler.
+        self.filler_df = max(1, int(VECTOR_COMMON_FRACTION * doc_count))
+        self.vectors = [(phrase, intent, self._vector(tokens)) for phrase, intent, tokens in docs]
+
+    def _tokens(self, text: str) -> list[str]:
+        out = []
+        for word in text.split():
+            word = self.synonyms.get(word, word)
+            if word:
+                out.extend(word.split())
+        return out
+
+    def _vector(self, tokens: list[str]) -> dict[str, float]:
+        counts = Counter(tokens)
+        weights = {t: (1 + math.log(n)) * self.idf.get(t, self.unknown_idf) for t, n in counts.items()}
+        norm = math.sqrt(sum(w * w for w in weights.values())) or 1.0
+        return {t: w / norm for t, w in weights.items()}
+
+    def query(self, text: str, allowed: Optional[Callable[[str], bool]] = None) -> Optional[tuple[str, str, float]]:
+        """Best (phrase, intent, similarity) for the text, or None."""
+        query_vec = self._vector(self._tokens(text))
+        if not query_vec:
+            return None
+        best: Optional[tuple[str, str, float]] = None
+        for phrase, intent, vec in self.vectors:
+            if allowed and not allowed(intent):
+                continue
+            shared = [t for t in query_vec if t in vec]
+            if not any(t not in self.stopwords and self.df.get(t, 0) <= self.filler_df for t in shared):
+                continue
+            # Vectors are unit length, so the squared shared weights sum to the
+            # share of the phrase that the message accounts for.
+            if sum(vec[t] * vec[t] for t in shared) < VECTOR_MIN_COVERAGE:
+                continue
+            score = sum(query_vec[t] * vec[t] for t in shared)
+            if best is None or score > best[2]:
+                best = (phrase, intent, score)
+        if best and best[2] >= VECTOR_THRESHOLD:
+            return best
+        return None
+
+
+# --------------------------------------------------------------------------
 # The chatbot
 # --------------------------------------------------------------------------
 
@@ -289,6 +385,10 @@ class RuleBasedChatbot:
         self.phrase_normalizations = {k: v for k, v in self.normalizations.items() if " " in k}
         self.word_normalizations = {k: v for k, v in self.normalizations.items() if " " not in k}
 
+        # Tier 5 index, built once from the same phrases the keyword tier uses.
+        stopwords = set(data["stopwords"]) if "stopwords" in data else None
+        self.vector_index = VectorIndex(self.phrase_lookup, data.get("synonyms", {}), stopwords)
+
     # -------------------------------------------------------------- sanitize
 
     _PUNCT_TO_STRIP = ",!?;:\"" + "".join(c for c in string.punctuation if c in "[]{}<>|~`")
@@ -330,6 +430,7 @@ class RuleBasedChatbot:
           2. pattern  - a regex with named groups matched, giving entities
           3. keyword  - a known phrase appears inside a longer message
           4. fuzzy    - close enough to a known phrase to forgive typos
+          5. vector   - TF-IDF cosine similarity, catches paraphrases
         """
         if not clean_input:
             return MatchResult(None, "none", 0.0)
@@ -379,10 +480,10 @@ class RuleBasedChatbot:
 
         # 4a. fuzzy on the whole message ("whats yor name" -> "what's your name")
         candidates = [p for p, i in self.phrase_lookup.items() if self._context_ok(i, last_intent)]
-        close = difflib.get_close_matches(clean_input, candidates, n=1, cutoff=self.fuzzy_threshold)
-        if close:
-            ratio = difflib.SequenceMatcher(None, clean_input, close[0]).ratio()
-            return MatchResult(self.phrase_lookup[close[0]], "fuzzy", round(ratio, 2), close[0])
+        for close in difflib.get_close_matches(clean_input, candidates, n=3, cutoff=self.fuzzy_threshold):
+            if self._is_typo_of(clean_input, close):
+                ratio = difflib.SequenceMatcher(None, clean_input, close).ratio()
+                return MatchResult(self.phrase_lookup[close], "fuzzy", round(ratio, 2), close)
 
         # 4b. fuzzy per word, single-word phrases only ("helo there" -> "hello")
         single_word_phrases = [p for p in candidates if " " not in p and len(p) >= FUZZY_MIN_WORD_LENGTH]
@@ -396,7 +497,29 @@ class RuleBasedChatbot:
                 confidence = round(ratio * (0.9 if len(words) == 1 else 0.75), 2)
                 return MatchResult(self.phrase_lookup[close[0]], "fuzzy", confidence, close[0])
 
+        # 5. vector: paraphrases that share meaning but not wording
+        #    ("could you tell me what the hour is" -> "tell me the time")
+        hit = self.vector_index.query(clean_input, allowed=lambda i: self._context_ok(i, last_intent))
+        if hit:
+            phrase, intent_name, score = hit
+            return MatchResult(intent_name, "vector", round(score, 2), phrase)
+
         return MatchResult(None, "none", 0.0)
+
+    @staticmethod
+    def _is_typo_of(text: str, phrase: str) -> bool:
+        """True if every word that differs between text and phrase looks like a
+        misspelling rather than a different word. Whole-string ratios accept
+        "what is it" for "that is it"; comparing the swapped words ("what" vs
+        "that", 0.75) rejects it while still accepting "helo" for "hello"."""
+        a, b = text.split(), phrase.split()
+        for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b).get_opcodes():
+            if op == "equal":
+                continue
+            left, right = " ".join(a[i1:i2]), " ".join(b[j1:j2])
+            if difflib.SequenceMatcher(None, left, right).ratio() < FUZZY_WORD_RATIO:
+                return False
+        return True
 
     # ------------------------------------------------------------- validators
 

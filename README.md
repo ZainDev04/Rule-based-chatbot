@@ -11,7 +11,7 @@ Nova is a chatbot that answers with rules instead of a model. Every reply can be
 ## What it does
 
 - Understands 34 intents: greetings, small talk, the time and date, arithmetic, jokes, coin flips, remembering your name, and an honest fallback when nothing matches.
-- Matches input in four tiers, cheapest first: exact dictionary lookup, regex patterns with entity extraction, keyword search inside longer sentences, and fuzzy matching for typos.
+- Matches input in five tiers, cheapest first: exact dictionary lookup, regex patterns with entity extraction, keyword search inside longer sentences, fuzzy matching for typos, and a TF-IDF vector tier for paraphrases.
 - Keeps per-session memory: your name, the last reply (so "say that again" works), and the turn count.
 - Normalises chat shorthand before matching, so "whats ur name" and "What's your name?" hit the same rule.
 - Returns a confidence score and the tier that matched, which the web interface displays on every message.
@@ -32,6 +32,7 @@ Nova is a chatbot that answers with rules instead of a model. Every reply can be
     2. pattern  regexes for names and arithmetic         -> miss
     3. keyword  longest known phrase inside the text     -> "what's your name"  (intent: name, 0.82)
     4. fuzzy    difflib against every phrase             -> (not reached)
+    5. vector   TF-IDF cosine over every phrase          -> (not reached)
         |
         v
   handler (if the intent needs one: time, date, math, memory)
@@ -43,7 +44,9 @@ Nova is a chatbot that answers with rules instead of a model. Every reply can be
   "I'm Nova, a rule-based chatbot."
 ```
 
-Each tier costs more than the one before it, and each is tried only if the previous one missed. The exact tier is a single dictionary lookup, so the common case stays O(1) no matter how many intents are loaded. Pattern-tier regexes carry named groups that become entities (`{"name": "zain"}`, `{"expr": "12 * 7"}`). The keyword tier prefers the longest phrase it finds, so "hi what time is it" resolves to `time` and not `greeting`. The fuzzy tier uses `difflib` with a 0.8 cutoff and never looks at words shorter than four letters, because "hi" is one edit away from too many things.
+Each tier costs more than the one before it, and each is tried only if the previous one missed. The exact tier is a single dictionary lookup, so the common case stays O(1) no matter how many intents are loaded. Pattern-tier regexes carry named groups that become entities (`{"name": "zain"}`, `{"expr": "12 * 7"}`). The keyword tier prefers the longest phrase it finds, so "hi what time is it" resolves to `time` and not `greeting`. The fuzzy tier uses `difflib` with a 0.8 cutoff, never looks at words shorter than four letters, and checks each swapped word on its own, so "helo" counts as "hello" but "what" is never accepted as "that".
+
+The vector tier is for messages that mean the same thing as a known phrase without sharing its wording: "could you tell me what the hour is" reaches `time` through "tell me the time". Every phrase is a TF-IDF vector over its words after synonym substitution (`hour` becomes `time`, `laugh` becomes `joke`), and the message is scored by cosine similarity. A match needs a similarity of 0.55, at least one shared content word (not a stopword, and not a word that appears in more than 5% of phrases), and the shared words must account for half of the phrase's weight. Those three guards are what stop "tell me" alone from matching "tell me a joke".
 
 Arithmetic is evaluated by walking a Python AST with a whitelist of number and operator nodes. `eval()` is never called.
 
@@ -111,24 +114,51 @@ Messages over 500 characters return 413, malformed bodies return 400, and more t
 Sessions live in memory on the server, expire after an hour idle, and are capped at 500. Every reply also returns the session state (`user_name`, `last_intent`, `last_reply`, `turn_count`), and the browser sends it back as `session_state` on the next request. That keeps memory working on serverless hosts such as Vercel, where two requests in a row may run in different processes.
 
 ```bash
-curl -s -X POST http://127.0.0.1:5000/api/chat \
+curl -s -X POST https://nova-rule-based-chatbot.vercel.app/api/chat \
   -H "Content-Type: application/json" \
-  -d '{"message": "hey what time is it", "session_id": "demo0001"}'
+  -d '{"message": "hey what time is it", "session_id": "readme-example"}'
 ```
+
+```json
+{
+  "bot_name": "Nova",
+  "cleaned_input": "hey what time is it",
+  "confidence": 0.82,
+  "entities": {},
+  "intent": "time",
+  "matched_phrase": "what time is it",
+  "processing_ms": 0.256,
+  "raw_input": "hey what time is it",
+  "response": "The current time is 3:43 PM (PKT).",
+  "session": {
+    "last_intent": "time",
+    "last_reply": "The current time is 3:43 PM (PKT).",
+    "started_at": "2026-09-18T15:40:02.118453+05:00",
+    "turn_count": 1,
+    "user_name": null
+  },
+  "session_ended": false,
+  "session_id": "readme-example",
+  "tier": "keyword"
+}
+```
+
+`tier` and `matched_phrase` say which rule fired and why, `confidence` is 1.0 for an exact hit and lower for the looser tiers, and `session` is what the browser sends back on the next turn.
 
 ## Project structure
 
 ```
 rule-based-chatbot/
 ├── chatbot.py              engine and terminal runner
-├── intents.json            knowledge base: 34 intents, patterns, responses, normalisations
+├── intents.json            knowledge base: 34 intents, patterns, responses, synonyms, stopwords
 ├── requirements.txt        Flask (runtime)
 ├── requirements-dev.txt    adds pytest
 ├── wsgi.py                 root entrypoint for Vercel
 ├── vercel.json             keeps tests and docs out of the function bundle
 ├── tests/
 │   ├── test_sanitize.py    input normalisation
-│   ├── test_matching.py    each matching tier
+│   ├── test_matching.py    exact, pattern, keyword and fuzzy tiers
+│   ├── test_vector.py      vector tier and the fuzzy word check
 │   ├── test_responses.py   handlers, memory, safe arithmetic, legacy helpers
 │   └── test_api.py         Flask routes, validation, sessions
 ├── web/
@@ -146,7 +176,7 @@ pip install -r requirements-dev.txt
 pytest -q
 ```
 
-101 tests run in under a second. They cover sanitisation, every tier with positive and negative cases, the safe evaluator (including inputs that try to escape it), session isolation, template filtering when the user's name is unknown, and every API route. One test walks every intent and checks that each of its own examples still reaches it, so a typo in `intents.json` fails CI.
+132 tests run in about a second. They cover sanitisation, every tier with positive and negative cases (including paraphrases the vector tier must catch and filler-only inputs it must reject), the safe evaluator (including inputs that try to escape it), session isolation, template filtering when the user's name is unknown, and every API route. One test walks every intent and checks that each of its own examples still reaches it, so a typo in `intents.json` fails CI.
 
 ## Adding an intent
 
@@ -178,6 +208,8 @@ Why sessions travel with the browser: the demo runs on Vercel, where two request
 
 Why the trace panel: in an interview, the interesting part of a rule-based bot is the matching, not the replies. Showing the tier and confidence on every message turns the demo into an explanation.
 
+Why TF-IDF for the vector tier and not a sentence embedding model: a small model such as `all-MiniLM-L6-v2` needs PyTorch, which puts the deployment at roughly 900 MB against Vercel's 500 MB function limit, adds seconds of cold start, and makes the reply depend on weights nobody can read. TF-IDF with a synonym table is 60 lines of standard-library Python, builds in a few milliseconds, gives a score that can be explained word by word, and lives in the same JSON file as everything else. It is a weaker matcher, and the limitations below say so.
+
 ## Deployment
 
 The repository is set up for Vercel's Python preset: `wsgi.py` at the root exposes the Flask `app`, `requirements.txt` lists Flask, `.python-version` pins 3.12, and `vercel.json` excludes tests and docs from the function bundle.
@@ -194,7 +226,7 @@ Time replies use Pakistan Standard Time (UTC+5) explicitly because the server ru
 
 ## Limitations and next steps
 
-- Matching is still lexical. "Could you tell me what the hour is" will fall back, because no pattern contains those words. A next step is a small embedding model in front of the fuzzy tier, used only when confidence is low.
+- The vector tier only knows the synonyms it is given. "Could you tell me what the hour is" works because `hour` is mapped to `time`; a paraphrase that uses none of the listed words still falls back. A sentence embedding model behind the vector tier, used only when its score is low and served from a host with no bundle limit, is the natural next step.
 - Context is one turn deep. Multi-turn slot filling ("book a table", "for when?") would need a state machine on top of the session.
 - The knowledge base is English only. The normalisation map is the natural place to add transliterated Urdu shorthand.
 - Sessions are lost on restart. Fine for a demo, not for a product.
