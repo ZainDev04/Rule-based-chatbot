@@ -521,7 +521,7 @@ button, input, textarea {
 /* Suggestion chips: one scrolling row on phones, wrapping from 768px. */
 .suggestions {
   border-top: 1px solid var(--color-border);
-  padding: var(--space-2) 0 0;
+  padding: var(--space-3) 0 0;
 }
 .suggestions-label {
   padding-inline: var(--space-4);
@@ -531,7 +531,7 @@ button, input, textarea {
 .chips {
   display: flex;
   gap: var(--space-4) var(--space-2);
-  padding: var(--space-2) var(--space-4) var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-4);
   overflow-x: auto;
   scroll-padding-inline: var(--space-4);
   scroll-snap-type: x proximity;
@@ -924,7 +924,7 @@ button, input, textarea {
     transform: none;
     visibility: visible;
     transition: none;
-    padding: var(--space-4) var(--space-3) var(--space-3);
+    padding: var(--space-3);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xs);
     box-shadow: none;
@@ -942,7 +942,7 @@ button, input, textarea {
   :root { --gutter: 32px; }
   .layout { grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-5); }
   .msg { max-width: 70%; }
-  .trace { padding: var(--space-4); }
+  .trace { padding: var(--space-3) var(--space-4) var(--space-4); }
 }
 
 /* Very short viewports (landscape phones): keep the composer reachable. */
